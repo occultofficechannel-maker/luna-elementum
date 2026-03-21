@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Luna Elementum" />
+  <meta name="description" content="달의 주기 · 4원소 의식 · QR 공유 · 유튜브 · 루나 타로" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Luna Elementum · 루나 엘레멘툼</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ===========================
+       CSS VARIABLES & RESET
+    =========================== */
+    :root {
+      --clr-bg: #0a0a1a;
+      --clr-surface: rgba(255,255,255,0.05);
+      --clr-border: rgba(255,255,255,0.10);
+      --clr-text: #e8e0f0;
+      --clr-text-dim: #9a8fb0;
+      --clr-accent: #c8a0f8;
+      --clr-glow: rgba(200, 160, 248, 0.3);
+
+      /* Element themes */
+      --elem-primary: #c8a0f8;
+      --elem-secondary: #9060c8;
+      --elem-glow: rgba(200, 160, 248, 0.25);
+      --elem-bg1: rgba(80, 20, 120, 0.35);
+      --elem-bg2: rgba(40, 5, 80, 0.20);
+
+      --transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      --radius: 20px;
+    }
+
+    /* Fire */
+    .theme-fire {
+      --elem-primary: #ff7c2a;
+      --elem-secondary: #e63c00;
+      --elem-glow: rgba(255, 100, 30, 0.30);
+      --elem-bg1: rgba(180, 40, 0, 0.35);
+      --elem-bg2: rgba(100, 20, 0, 0.20);
+      --clr-accent: #ff9a50;
+    }
+    /* Water */
+    .theme-water {
+      --elem-primary: #38c8e8;
+      --elem-secondary: #0070a8;
+      --elem-glow: rgba(40, 180, 220, 0.30);
+      --elem-bg1: rgba(0, 80, 140, 0.35);
+      --elem-bg2: rgba(0, 40, 80, 0.20);
+      --clr-accent: #60d8f8;
+    }
+    /* Earth */
+    .theme-earth {
+      --elem-primary: #70c850;
+      --elem-secondary: #4a7a20;
+      --elem-glow: rgba(80, 180, 60, 0.28);
+      --elem-bg1: rgba(30, 80, 10, 0.35);
+      --elem-bg2: rgba(60, 40, 0, 0.20);
+      --clr-accent: #90e070;
+    }
+    /* Air */
+    .theme-air {
+      --elem-primary: #a0c8ff;
+      --elem-secondary: #6060d0;
+      --elem-glow: rgba(140, 180, 255, 0.28);
+      --elem-bg1: rgba(40, 40, 140, 0.35);
+      --elem-bg2: rgba(20, 20, 80, 0.20);
+      --clr-accent: #b8d8ff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { height: 100%; }
+
+    body {
+      min-height: 100%;
+      background-color: var(--clr-bg);
+      color: var(--clr-text);
+      font-family: 'Noto Sans KR', sans-serif;
+      overflow-x: hidden;
+      transition: background-color var(--transition);
+    }
+
+    /* ===========================
+       STAR BACKGROUND
+    =========================== */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+      opacity: var(--op, 0.6);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--op, 0.6); transform: scale(1); }
+      50% { opacity: 0.1; transform: scale(0.5); }
+    }
+
+    /* ===========================
+       ELEMENT GLOW OVERLAY
+    =========================== */
+    #glow-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 60%, var(--elem-bg1) 0%, var(--elem-bg2) 50%, transparent 75%);
+      transition: background var(--transition);
+    }
+
+    /* ===========================
+       MAIN WRAPPER
+    =========================== */
+    #app {
+      position: relative;
+      z-index: 2;
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 0 0 100px;
+      min-height: 100vh;
+    }
+
+    /* ===========================
+       HEADER
+    =========================== */
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    .app-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--elem-primary);
+      text-shadow: 0 0 18px var(--elem-glow), 0 0 36px var(--elem-glow), 0 0 60px var(--elem-glow);
+      transition: color var(--transition), text-shadow var(--transition);
+      line-height: 1.3;
+    }
+
+    .app-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: var(--clr-text-dim);
+      letter-spacing: 4px;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    .current-date {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--clr-text-dim);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300;
+    }
+
+    /* ===========================
+       MOON SECTION
+    =========================== */
+    .moon-section {
+      padding: 10px 20px 20px;
+      text-align: center;
+    }
+
+    .moon-visual-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 20px;
+      width: 160px;
+      height: 160px;
+      position: relative;
+    }
+
+    .moon-glow-ring {
+      position: absolute;
+      inset: -15px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--elem-glow) 0%, transparent 70%);
+      transition: background var(--transition);
+      animation: pulseMoon 4s ease-in-out infinite;
+    }
+
+    @keyframes pulseMoon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.7; }
+    }
+
+    #moon-svg {
+      width: 140px;
+      height: 140px;
+      filter: drop-shadow(0 0 12px rgba(220, 200, 255, 0.5));
+      position: relative;
+      z-index: 1;
+    }
+
+    .moon-info {
+      margin-bottom: 6px;
+    }
+
+    .moon-phase-name {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--clr-text);
+      letter-spacing: 1px;
+    }
+
+    .moon-phase-name-ko {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 14px;
+      color: var(--elem-primary);
+      transition: color var(--transition);
+      margin-top: 2px;
+    }
+
+    .moon-illumination {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: 30px;
+      padding: 5px 16px;
+      font-size: 13px;
+      color: var(--clr-text-dim);
+    }
+
+    .illum-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--elem-primary);
+      box-shadow: 0 0 6px var(--elem-glow);
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+
+    .moon-energy-card {
+      margin: 14px 0 0;
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      text-align: left;
+    }
+
+    .moon-energy-label {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--elem-primary);
+      text-transform: uppercase;
+      transition: color var(--transition);
+      margin-bottom: 6px;
+    }
+
+    .moon-energy-text {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--clr-text-dim);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300;
+    }
+
+    /* ===========================
+       ELEMENT SELECTOR
+    =========================== */
+    .element-section {
+      padding: 0 20px 20px;
+    }
+
+    .section-label {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--clr-text-dim);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .element-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .elem-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 9px 5px;
+      border-radius: 13px;
+      border: 1.5px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .elem-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+
+    .elem-btn.fire::before { background: radial-gradient(circle at 50% 100%, rgba(255,100,20,0.35) 0%, transparent 70%); }
+    .elem-btn.water::before { background: radial-gradient(circle at 50% 100%, rgba(30,170,220,0.35) 0%, transparent 70%); }
+    .elem-btn.earth::before { background: radial-gradient(circle at 50% 100%, rgba(60,170,50,0.35) 0%, transparent 70%); }
+    .elem-btn.air::before  { background: radial-gradient(circle at 50% 100%, rgba(120,160,255,0.35) 0%, transparent 70%); }
+
+    .elem-btn.active::before, .elem-btn:hover::before { opacity: 1; }
+
+    .elem-btn.fire.active  { border-color: #ff7c2a; box-shadow: 0 0 18px rgba(255,100,20,0.5), inset 0 0 10px rgba(255,100,20,0.1); }
+    .elem-btn.water.active { border-color: #38c8e8; box-shadow: 0 0 18px rgba(30,180,220,0.5), inset 0 0 10px rgba(30,180,220,0.1); }
+    .elem-btn.earth.active { border-color: #70c850; box-shadow: 0 0 18px rgba(80,180,50,0.5), inset 0 0 10px rgba(80,180,50,0.1); }
+    .elem-btn.air.active   { border-color: #a0c8ff; box-shadow: 0 0 18px rgba(140,180,255,0.5), inset 0 0 10px rgba(140,180,255,0.1); }
+
+    .elem-icon { font-size: 22px; line-height: 1; }
+
+    .elem-name {
+      font-size: 10px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 500;
+      color: var(--clr-text-dim);
+      transition: color 0.3s;
+    }
+
+    .elem-btn.fire.active  .elem-name { color: #ff9a50; }
+    .elem-btn.water.active .elem-name { color: #60d8f8; }
+    .elem-btn.earth.active .elem-name { color: #90e070; }
+    .elem-btn.air.active   .elem-name { color: #b8d8ff; }
+
+    /* ===========================
+       RITUAL SECTION
+    =========================== */
+    .ritual-section {
+      padding: 0 20px 20px;
+    }
+
+    .ritual-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .ritual-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--elem-primary);
+      transition: color var(--transition);
+      line-height: 1.4;
+    }
+
+    .ritual-subtitle {
+      font-size: 12px;
+      color: var(--clr-text-dim);
+      margin-top: 4px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    /* ritual cards */
+    .ritual-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: border-color var(--transition);
+    }
+
+    .ritual-card:hover {
+      border-color: rgba(255,255,255,0.20);
+    }
+
+    .card-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .card-label-icon {
+      font-size: 16px;
+    }
+
+    .card-label-text {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--elem-primary);
+      transition: color var(--transition);
+    }
+
+    .card-content {
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: var(--clr-text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300;
+    }
+
+    .card-content strong {
+      color: var(--clr-accent);
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .tools-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 4px;
+    }
+
+    .tools-list li {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 3px 11px;
+      font-size: 12px;
+      color: var(--clr-text-dim);
+    }
+
+    .steps-list {
+      list-style: none;
+      padding: 0;
+      counter-reset: step-counter;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .steps-list li {
+      counter-increment: step-counter;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .steps-list li::before {
+      content: counter(step-counter);
+      min-width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--elem-bg1);
+      border: 1px solid var(--elem-primary);
+      color: var(--elem-primary);
+      font-size: 11px;
+      font-family: 'Cinzel', serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .steps-list li span {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--clr-text-dim);
+    }
+
+    .intent-text {
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: var(--clr-text);
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 2px solid var(--elem-primary);
+      transition: border-color var(--transition);
+    }
+
+    /* divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--clr-border), transparent);
+      margin: 20px 0;
+    }
+
+    /* ===========================
+       FADE ANIMATION
+    =========================== */
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===========================
+       SCROLLBAR
+    =========================== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  
+
+    /* ===========================
+       HEADER ACTIONS / VERSION
+    =========================== */
+    .header-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      appearance: none;
+      border: 1px solid var(--clr-border);
+      background: rgba(255,255,255,0.05);
+      color: var(--clr-text);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      transition: transform .2s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease;
+    }
+    .action-btn:active { transform: scale(0.98); }
+    .action-btn:hover {
+      border-color: var(--elem-primary);
+      box-shadow: 0 0 0 1px var(--elem-primary), 0 0 18px var(--elem-glow);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .action-btn svg { width: 16px; height: 16px; }
+
+    .youtube-btn {
+      border-color: rgba(255, 74, 74, 0.55) !important;
+      color: #ffdcdc;
+      background: rgba(120, 12, 12, 0.22);
+    }
+    .youtube-btn:hover {
+      border-color: rgba(255, 74, 74, 0.95) !important;
+      box-shadow: 0 0 0 1px rgba(255,74,74,0.65), 0 0 22px rgba(255,74,74,0.25) !important;
+      background: rgba(160, 12, 12, 0.28);
+    }
+
+    .version-badge {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: var(--clr-text-dim);
+    }
+
+    /* ===========================
+       TAROT SECTION
+    =========================== */
+    .tarot-section {
+      margin: 0 20px;
+      padding: 20px 16px 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.035));
+      border: 1px solid var(--clr-border);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.24);
+    }
+
+    .tarot-title {
+      text-align: center;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 22px;
+      letter-spacing: 1.5px;
+      color: var(--elem-primary);
+      text-shadow: 0 0 12px var(--elem-glow);
+      margin-bottom: 6px;
+    }
+
+    .tarot-subtitle {
+      text-align: center;
+      color: var(--clr-text-dim);
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0 auto 16px;
+      max-width: 320px;
+    }
+
+    .tarot-draw-btn {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--elem-primary) 24%, transparent), rgba(255,255,255,0.05));
+      color: #fff;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--elem-glow);
+      transition: transform .2s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .tarot-draw-btn:active { transform: scale(0.99); }
+
+    .tarot-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--clr-text-dim);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .tarot-result {
+      margin-top: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .tarot-intro {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--clr-text);
+      font-size: 14px;
+      line-height: 1.75;
+      text-align: center;
+    }
+
+    .tarot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .tarot-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(18,18,36,0.92), rgba(8,8,22,0.98));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.26), inset 0 0 0 1px rgba(255,255,255,0.04);
+      min-height: 240px;
+    }
+
+    .tarot-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 55%);
+      pointer-events: none;
+    }
+
+    .tarot-card-top {
+      padding: 14px 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--clr-text-dim);
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .tarot-card-visual {
+      height: 92px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 54px;
+      filter: drop-shadow(0 0 18px var(--elem-glow));
+    }
+
+    .tarot-card-body {
+      padding: 8px 12px 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .tarot-card-name {
+      text-align: center;
+      font-family: 'Noto Serif KR', serif;
+      font-size: 16px;
+      color: #fff;
+      line-height: 1.35;
+    }
+
+    .tarot-card-name small {
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--clr-text-dim);
+      letter-spacing: .6px;
+    }
+
+    .tarot-badge {
+      margin: 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      font-size: 11px;
+      color: var(--elem-primary);
+    }
+
+    .tarot-keywords {
+      text-align: center;
+      font-size: 12px;
+      color: var(--clr-text-dim);
+      line-height: 1.5;
+      min-height: 36px;
+    }
+
+    .tarot-message {
+      font-size: 12px;
+      line-height: 1.65;
+      color: var(--clr-text);
+      text-align: center;
+    }
+
+    .tarot-footer-note {
+      margin-top: 2px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--clr-text-dim);
+      line-height: 1.6;
+    }
+
+    /* ===========================
+       QR MODAL
+    =========================== */
+    .qr-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(4, 4, 12, 0.82);
+      backdrop-filter: blur(10px);
+    }
+    .qr-modal.open { display: flex; }
+
+    .qr-panel {
+      width: min(360px, 100%);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(20,20,36,0.98), rgba(12,12,24,0.98));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.40);
+      padding: 20px 18px 18px;
+      text-align: center;
+    }
+
+    .qr-title {
+      font-family: 'Cinzel Decorative', serif;
+      color: var(--elem-primary);
+      font-size: 22px;
+      text-shadow: 0 0 12px var(--elem-glow);
+    }
+
+    .qr-desc {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--clr-text-dim);
+      line-height: 1.6;
+    }
+
+    .qr-image-wrap {
+      margin: 16px auto 12px;
+      width: 236px;
+      height: 236px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    }
+
+    .qr-image-wrap img {
+      width: 220px;
+      height: 220px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .share-url {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--clr-text-dim);
+      font-size: 12px;
+      line-height: 1.5;
+      word-break: break-all;
+      user-select: all;
+      margin-bottom: 12px;
+    }
+
+    .qr-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .qr-close {
+      margin-top: 4px;
+      width: 100%;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(10,10,20,0.92);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 14px 35px rgba(0,0,0,0.28);
+      transition: opacity .25s ease, transform .25s ease;
+      font-size: 13px;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 380px) {
+      .tarot-grid { grid-template-columns: 1fr; }
+      .qr-actions { grid-template-columns: 1fr; }
+      .action-btn { width: 100%; }
+      .header-actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .app-title { font-size: 28px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Star Field -->
+<div id="starfield"></div>
+
+<!-- Glow Overlay -->
+<div id="glow-overlay"></div>
+
+<!-- App -->
+<div id="app" class="theme-air">
+
+  <!-- HEADER -->
+  <header>
+    <div class="app-title">Luna Elementum</div>
+    <div class="app-subtitle">루나 엘레멘툼 · 달과 원소의 비의</div>
+    <div class="current-date" id="current-date"></div>
+    <div class="header-actions">
+      <button class="action-btn" id="qr-open-btn" type="button" aria-label="QR 코드 공유">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"></path>
+          <path d="M14 14h3v3h-3zM17 17h3v3h-3zM20 14v2M14 20h2"></path>
+        </svg>
+        <span>QR코드 공유</span>
+      </button>
+      <a class="action-btn youtube-btn" href="https://www.youtube.com/@cursekey" target="_blank" rel="noopener noreferrer" aria-label="유튜브 채널 열기">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ff4a4a" d="M23 12.1c0-2.2-.2-3.8-.6-5.1-.4-1.2-1.2-2.1-2.4-2.5C18.7 4 12 4 12 4s-6.7 0-8 .5C2.8 4.9 2 5.8 1.6 7 1.2 8.3 1 9.9 1 12.1c0 2.2.2 3.8.6 5.1.4 1.2 1.2 2.1 2.4 2.5 1.3.5 8 .5 8 .5s6.7 0 8-.5c1.2-.4 2-1.3 2.4-2.5.4-1.3.6-2.9.6-5.1Z"></path><path fill="#fff" d="M10 15.5v-7l6 3.5-6 3.5Z"></path></svg>
+        <span>@cursekey</span>
+      </a>
+    </div>
+    <div class="version-badge">LATEST COMPLETE · QR FIXED · TAROT ADDED</div>
+
+  </header>
+
+  <!-- MOON SECTION -->
+  <section class="moon-section">
+    <div class="moon-visual-wrap">
+      <div class="moon-glow-ring"></div>
+      <svg id="moon-svg" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="moon-info">
+      <div class="moon-phase-name" id="moon-phase-en"></div>
+      <div class="moon-phase-name-ko" id="moon-phase-ko"></div>
+    </div>
+
+    <div class="moon-illumination">
+      <span class="illum-dot"></span>
+      <span id="moon-illum-text"></span>
+    </div>
+
+    <div class="moon-energy-card">
+      <div class="moon-energy-label">✦ 달의 에너지</div>
+      <div class="moon-energy-text" id="moon-energy-desc"></div>
+    </div>
+  </section>
+
+  <div class="divider" style="margin: 0 20px 20px;"></div>
+
+  <!-- ELEMENT SELECTOR -->
+  <section class="element-section">
+    <div class="section-label">✧ 원소를 선택하세요 ✧</div>
+    <div class="element-grid">
+      <button class="elem-btn fire" onclick="selectElement('fire')">
+        <span class="elem-icon">🔥</span>
+        <span class="elem-name">불</span>
+      </button>
+      <button class="elem-btn water" onclick="selectElement('water')">
+        <span class="elem-icon">💧</span>
+        <span class="elem-name">물</span>
+      </button>
+      <button class="elem-btn earth" onclick="selectElement('earth')">
+        <span class="elem-icon">🌿</span>
+        <span class="elem-name">흙</span>
+      </button>
+      <button class="elem-btn air" onclick="selectElement('air')">
+        <span class="elem-icon">💨</span>
+        <span class="elem-name">바람</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="divider" style="margin: 0 20px 20px;"></div>
+
+  <!-- RITUAL SECTION -->
+  <section class="ritual-section" id="ritual-section">
+    <!-- JS로 동적 생성 -->
+  </section>
+
+
+  <div class="divider" style="margin: 20px 20px 20px;"></div>
+
+  <!-- TAROT SECTION -->
+  <section class="tarot-section" id="tarot-section">
+    <div class="tarot-title">OPIO의 루나 타로</div>
+    <div class="tarot-subtitle">당신이 가장 궁금해 하는 것을 생각하세요. 오늘의 달 주기와 선택한 원소에 맞춰 하루 한 번, 3장의 카드를 펼칩니다.</div>
+    <button class="tarot-draw-btn" id="tarot-draw-btn" type="button">오늘의 타로 펼치기</button>
+    <div class="tarot-note">과거 · 현재 · 미래 3장 리딩 · 하루 1회 저장</div>
+    <div class="tarot-result" id="tarot-result"></div>
+  </section>
+
+</div>
+
+<div class="qr-modal" id="qr-modal" aria-hidden="true">
+  <div class="qr-panel" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+    <div class="qr-title" id="qr-title">QR 공유</div>
+    <div class="qr-desc">지금 보고 있는 Luna Elementum 최신 페이지 주소를 QR로 바로 공유할 수 있어요.</div>
+    <div class="qr-image-wrap"><img id="qr-image" alt="Luna Elementum QR 코드" /></div>
+    <div class="share-url" id="share-url"></div>
+    <div class="qr-actions">
+      <button class="action-btn" id="copy-link-btn" type="button">링크 복사</button>
+      <button class="action-btn" id="share-btn" type="button">공유하기</button>
+    </div>
+    <button class="action-btn qr-close" id="qr-close-btn" type="button">닫기</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =============================================
+   STAR FIELD GENERATOR
+============================================= */
+(function createStars() {
+  const field = document.getElementById('starfield');
+  const count = 180;
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${Math.random() * 100}%;
+      top: ${Math.random() * 100}%;
+      --dur: ${(Math.random() * 4 + 2).toFixed(1)}s;
+      --delay: ${(Math.random() * 5).toFixed(1)}s;
+      --op: ${(Math.random() * 0.5 + 0.2).toFixed(2)};
+    `;
+    field.appendChild(s);
+  }
+})();
+
+/* =============================================
+   LUNAR PHASE CALCULATION
+============================================= */
+function getLunarPhase(date) {
+  // Known new moon reference: January 6, 2000
+  const knownNewMoon = new Date('2000-01-06T18:14:00Z');
+  const synodicMonth = 29.53058867; // days
+  const diff = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
+  let age = diff % synodicMonth;
+  if (age < 0) age += synodicMonth;
+
+  const illumination = Math.round(((1 - Math.cos((age / synodicMonth) * 2 * Math.PI)) / 2) * 100);
+
+  let phaseIndex;
+  if      (age <  1.845)                   phaseIndex = 0; // New Moon
+  else if (age <  1.845 + 5.383)           phaseIndex = 1; // Waxing Crescent
+  else if (age <  1.845 + 5.383 + 1.845)  phaseIndex = 2; // First Quarter
+  else if (age < 14.765)                   phaseIndex = 3; // Waxing Gibbous
+  else if (age < 14.765 + 1.845)          phaseIndex = 4; // Full Moon
+  else if (age < 14.765 + 1.845 + 5.383) phaseIndex = 5; // Waning Gibbous
+  else if (age < 14.765 + 1.845 + 5.383 + 1.845) phaseIndex = 6; // Last Quarter
+  else                                     phaseIndex = 7; // Waning Crescent
+
+  return { age, illumination, phaseIndex };
+}
+
+const PHASES = [
+  { en: 'New Moon',        ko: '삭월 · 신월',           emoji: '🌑' },
+  { en: 'Waxing Crescent', ko: '초승달 · 달이 차오름',   emoji: '🌒' },
+  { en: 'First Quarter',   ko: '상현달 · 반달',          emoji: '🌓' },
+  { en: 'Waxing Gibbous',  ko: '차오르는 볼록달',         emoji: '🌔' },
+  { en: 'Full Moon',       ko: '보름달 · 망월',           emoji: '🌕' },
+  { en: 'Waning Gibbous',  ko: '이지러지는 볼록달',        emoji: '🌖' },
+  { en: 'Last Quarter',    ko: '하현달 · 반달',           emoji: '🌗' },
+  { en: 'Waning Crescent', ko: '그믐달 · 달이 기움',      emoji: '🌘' },
+];
+
+const PHASE_ENERGY = [
+  '모든 것이 고요히 잠든 시간. 새로운 주기가 씨앗처럼 움트는 순간입니다. 의도를 심고, 새로운 시작을 위한 공간을 여세요.',
+  '달이 빛을 받기 시작합니다. 작은 꿈이 싹을 틔우고, 행동을 향한 첫 발을 내딛는 에너지가 흐릅니다.',
+  '강인한 결의의 순간. 어둠과 빛의 균형 속에서, 당신의 의지를 세상에 선언할 때입니다.',
+  '빛이 점점 차오릅니다. 목표를 향해 힘차게 전진하고 축적하는 강력한 에너지의 시간입니다.',
+  '달이 완전히 빛납니다. 모든 에너지가 정점에 달하며, 마법과 직관이 가장 강렬하게 활성화됩니다.',
+  '충만함이 서서히 기울기 시작합니다. 감사하고, 내려놓고, 불필요한 것을 손에서 놓을 시간입니다.',
+  '빛과 그늘이 다시 균형을 이룹니다. 내면을 돌아보고, 완성되지 않은 것을 정리하세요.',
+  '달이 어둠 속으로 돌아가기 전 마지막 빛. 오래된 습관, 부정적인 패턴을 해소하고 정화할 시간입니다.',
+];
+
+/* =============================================
+   MOON SVG RENDERER
+============================================= */
+function renderMoonSVG(age, phaseIndex) {
+  const svg = document.getElementById('moon-svg');
+  const cx = 70, cy = 70, r = 60;
+  const synodic = 29.53058867;
+  const t = age / synodic; // 0~1
+
+  const moonBase = '#d4c8f0';
+  const moonShadow = '#1a1630';
+  const crater1 = '#b8a8d8';
+  const crater2 = '#c0b0e0';
+
+  let pathD = '';
+
+  if (phaseIndex === 4) {
+    // Full moon — simple circle
+    pathD = `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
+  } else if (phaseIndex === 0) {
+    // New Moon — no light
+    svg.innerHTML = `
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="${moonShadow}" opacity="0.5"/>
+    `;
+    return;
+  } else {
+    // Compute illuminated portion
+    const angle = t * 2 * Math.PI;
+    // rx of the ellipse that separates light/dark
+    const ellipseRx = Math.abs(Math.cos(angle)) * r;
+    const isWaxing = t < 0.5;
+    const ellipseXSign = isWaxing ? 1 : -1;
+
+    // Large arc = right hemisphere lit (waxing) or left (waning)
+    // Draw lit side: always a semicircle on one side + ellipse in the middle
+    const topX = cx;
+    const topY = cy - r;
+    const botX = cx;
+    const botY = cy + r;
+
+    if (isWaxing) {
+      // lit = right side
+      // Right semicircle (large arc, counterclockwise)
+      // Center ellipse (small), flipped inward
+      pathD = [
+        `M ${topX} ${topY}`,
+        `A ${r} ${r} 0 0 1 ${botX} ${botY}`,  // right outer arc (lit)
+        `A ${ellipseRx} ${r} 0 0 1 ${topX} ${topY}`, // inner ellipse back up (shadow side)
+        'Z'
+      ].join(' ');
+    } else {
+      // lit = left side
+      pathD = [
+        `M ${topX} ${topY}`,
+        `A ${r} ${r} 0 0 0 ${botX} ${botY}`,  // left outer arc (lit)
+        `A ${ellipseRx} ${r} 0 0 0 ${topX} ${topY}`, // inner ellipse back up
+        'Z'
+      ].join(' ');
+    }
+  }
+
+  // Build SVG
+  let svgContent = `
+    <defs>
+      <radialGradient id="moonGrad" cx="45%" cy="40%" r="55%">
+        <stop offset="0%" stop-color="#efe8ff"/>
+        <stop offset="60%" stop-color="#c8b8e8"/>
+        <stop offset="100%" stop-color="#a090c0"/>
+      </radialGradient>
+      <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#12102a" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#0a0818" stop-opacity="0.98"/>
+      </radialGradient>
+      <clipPath id="moonClip">
+        <circle cx="${cx}" cy="${cy}" r="${r}"/>
+      </clipPath>
+    </defs>
+    <!-- dark base -->
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#shadowGrad)"/>
+    <!-- lit portion -->
+    <path d="${pathD}" fill="url(#moonGrad)" clip-path="url(#moonClip)"/>
+    <!-- craters -->
+    <circle cx="${cx+20}" cy="${cy-15}" r="7" fill="${crater1}" opacity="0.3" clip-path="url(#moonClip)"/>
+    <circle cx="${cx-22}" cy="${cy+12}" r="5" fill="${crater2}" opacity="0.25" clip-path="url(#moonClip)"/>
+    <circle cx="${cx+5}"  cy="${cy+25}" r="4" fill="${crater1}" opacity="0.2"  clip-path="url(#moonClip)"/>
+    <circle cx="${cx-10}" cy="${cy-25}" r="3" fill="${crater2}" opacity="0.2"  clip-path="url(#moonClip)"/>
+    <!-- outer glow ring -->
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(200,180,255,0.12)" stroke-width="2"/>
+  `;
+  svg.innerHTML = svgContent;
+}
+
+/* =============================================
+   RITUAL DATA (32 combinations)
+   Keys: fire|water|earth|air × 0~7
+============================================= */
+const RITUALS = {
+  fire: [
+    /* 0: New Moon */
+    {
+      name: '불꽃 씨앗 의식',
+      subtitle: '의도를 불꽃 속에 심다',
+      time: '자정, 촛불이 홀로 타오를 때',
+      tools: ['붉은 촛불', '월계수 잎', '소원을 적은 종이', '성냥 (라이터 대신)', '붉은 크리스탈'],
+      steps: [
+        '방의 모든 불을 끄고 붉은 촛불 하나만 켜세요.',
+        '월계수 잎 위에 검은 잉크로 새로운 의도를 적습니다.',
+        '양손을 촛불 위에 모아 열기를 느끼며 그 의도를 30초간 마음에 새기세요.',
+        '종이와 월계수 잎을 촛불로 태우며 "나는 이 의도를 불꽃에 씨앗으로 심는다"고 선언합니다.',
+        '촛불이 완전히 꺼질 때까지 두거나, 안전하게 끄고 다음 보름달까지 기다리세요.',
+      ],
+      intent: '새로운 시작에 강렬한 의도를 불어넣어 변화의 불씨를 내면 깊이 심습니다. 불은 변환의 원소로, 모든 것을 새것으로 만드는 힘을 가집니다.',
+    },
+    /* 1: Waxing Crescent */
+    {
+      name: '촛불 성장 의식',
+      subtitle: '빛이 자라듯 꿈도 자란다',
+      time: '해가 진 직후, 초승달이 하늘에 뜰 때',
+      tools: ['주황색 촛불', '계피 스틱', '해바라기 씨앗', '금색 리본', '페퍼민트 오일'],
+      steps: [
+        '주황 촛불에 페퍼민트 오일 한 방울을 바릅니다.',
+        '계피 스틱을 촛불 옆에 놓고 향기를 맡으며 목표를 생생하게 상상합니다.',
+        '해바라기 씨앗 3개를 금색 리본에 묶으며 "나는 성장하고, 빛을 향해 나아간다"고 말합니다.',
+        '촛불이 타는 동안 성장을 향한 구체적인 계획을 종이에 적으세요.',
+        '묶은 씨앗을 창가에 두고 촛불을 끕니다.',
+      ],
+      intent: '초승달의 성장하는 에너지와 불의 추진력을 결합하여 목표를 향한 동기와 열정을 강화합니다.',
+    },
+    /* 2: First Quarter */
+    {
+      name: '결단의 불꽃 의식',
+      subtitle: '어둠과 빛 사이에서 선택하다',
+      time: '한밤중, 반달이 중천에 걸릴 때',
+      tools: ['금빛 초', '노란 장미꽃잎', '결단할 상황을 적은 두 장의 종이', '황동 그릇', '생강 가루'],
+      steps: [
+        '두 장의 종이에 각각 두 가지 선택지를 적습니다.',
+        '금빛 초를 켜고 생강 가루를 불꽃 가까이 뿌려 강렬한 의지를 불러일으킵니다.',
+        '양손에 종이를 들고 각각의 결과를 깊이 느끼며 직관이 이끄는 쪽을 택하세요.',
+        '선택하지 않은 종이를 황동 그릇에서 태우며 "나는 명확한 의지로 나아간다"고 선언합니다.',
+        '선택한 종이는 접어서 금빛 초 옆에 7일간 둡니다.',
+      ],
+      intent: '불의 명료함과 상현달의 강인한 의지가 결합하여, 모호함을 태우고 결단력을 극대화합니다.',
+    },
+    /* 3: Waxing Gibbous */
+    {
+      name: '용기의 불꽃 의식',
+      subtitle: '완전히 타오르기 직전, 더 크게 불을 키워라',
+      time: '저녁 9시~11시, 달이 높이 떠오를 때',
+      tools: ['빨간 초 3개', '드래곤 블러드 수지', '붉은 카네이션', '흑요석', '사프란 한 꼬집'],
+      steps: [
+        '빨간 초 3개를 삼각형으로 배치하고 드래곤 블러드 수지를 사이에 놓습니다.',
+        '사프란을 불꽃 위에 뿌리며 용기와 자신감의 에너지를 소환합니다.',
+        '흑요석을 양손에 쥐고 두려움이 느껴지는 부분을 마음속으로 불꽃에 던집니다.',
+        '붉은 카네이션을 하나씩 집으며 자신의 강점 세 가지를 크게 말합니다.',
+        '초들을 동시에 끄며 "내 용기는 불꽃처럼 자유롭게 타오른다"고 선언합니다.',
+      ],
+      intent: '차오르는 달의 힘을 빌려 내면의 불꽃을 최대한 키웁니다. 두려움을 태우고 용기를 증폭시키는 의식입니다.',
+    },
+    /* 4: Full Moon */
+    {
+      name: '불꽃 해방 의식',
+      subtitle: '보름달 아래, 오래된 것을 불에 맡기다',
+      time: '보름달이 하늘 정중앙에 오르는 자정',
+      tools: ['흰색 큰 초', '오래된 편지나 사진', '세이지 다발', '내려놓을 것을 적은 종이', '황금색 그릇'],
+      steps: [
+        '야외 혹은 창가에서 보름달 빛을 받으며 흰 초를 켭니다.',
+        '세이지 다발을 불에 붙여 자신의 몸 주위를 정화하며 "나는 과거를 정화한다"고 말합니다.',
+        '내려놓을 것을 적은 종이를 황금 그릇에서 태우며 해방을 선언합니다.',
+        '오래된 물건이 있다면 잠시 감사를 전하고, 태우거나 처분할 준비를 합니다.',
+        '보름달을 바라보며 "나는 완전하고, 자유롭다"고 선언한 뒤 초를 끕니다.',
+      ],
+      intent: '보름달의 강렬한 에너지와 불의 변환력을 합쳐, 묵은 감정과 패턴을 완전히 해방하고 새로운 자아로 거듭납니다.',
+    },
+    /* 5: Waning Gibbous */
+    {
+      name: '감사의 불꽃 의식',
+      subtitle: '빛이 기울 때, 충만함에 감사하다',
+      time: '해질녘 혹은 이른 저녁',
+      tools: ['호박색 초', '계피와 정향 블렌드', '감사 일지', '금잔화 꽃잎', '청동 종'],
+      steps: [
+        '호박색 초에 계피·정향 오일을 바르고 켭니다.',
+        '금잔화 꽃잎을 초 주위에 원형으로 배치합니다.',
+        '감사 일지에 이번 달 주기에 받은 은혜 다섯 가지를 적습니다.',
+        '각 항목을 소리 내어 읽으며 청동 종을 한 번씩 울립니다.',
+        '초를 바라보며 충만함에 감사한 후 자연스럽게 끄거나 다 타도록 둡니다.',
+      ],
+      intent: '이지러지는 달과 불의 결합으로 풍요에 대한 깊은 감사를 실천하고, 더 큰 축복을 맞이할 내면의 공간을 만듭니다.',
+    },
+    /* 6: Last Quarter */
+    {
+      name: '정화의 불꽃 의식',
+      subtitle: '불필요한 것을 불로 녹이다',
+      time: '자정 이후, 하현달이 뜨는 시간',
+      tools: ['검은 초', '소금', '해묵은 습관을 적은 종이', '알루미늄 또는 철 그릇', '사이프러스 에센셜 오일'],
+      steps: [
+        '검은 초에 사이프러스 오일을 바르고 켭니다.',
+        '고리 모양으로 소금을 주위에 뿌려 정화 서클을 만듭니다.',
+        '내려놓고 싶은 습관 또는 패턴을 종이에 적습니다.',
+        '종이를 철 그릇에서 태우며 "나는 이것이 더 이상 나를 지배하지 않음을 선언한다"고 말합니다.',
+        '재를 바람에 날리거나 땅에 묻어 자연으로 돌려보냅니다.',
+      ],
+      intent: '하현달의 내려놓음 에너지와 불의 정화력이 만나, 부정적인 패턴과 자기 제한적 믿음을 태워 없앱니다.',
+    },
+    /* 7: Waning Crescent */
+    {
+      name: '암흑 전의 불씨 의식',
+      subtitle: '꺼지기 전 마지막 빛으로 씨앗을 지키다',
+      time: '새벽 3시~5시, 동이 트기 전',
+      tools: ['작은 빨간 초 7개', '라벤더', '다음 주기를 위한 의도 목록', '작은 상자', '검은 천'],
+      steps: [
+        '7개의 작은 빨간 초를 원형으로 배치하고 모두 켭니다.',
+        '라벤더 향기를 맡으며 지난 한 달의 여정을 조용히 돌아봅니다.',
+        '다음 달 새로운 주기에 심고 싶은 의도를 종이에 적습니다.',
+        '종이를 작은 상자에 넣어 검은 천으로 덮습니다 — 씨앗처럼 보호받을 것입니다.',
+        '초들을 하나씩 끄며 "나는 어둠 속에서도 내 불씨를 지킨다"고 말합니다.',
+      ],
+      intent: '그믐달의 휴식과 준비의 에너지 속에서, 다음 주기를 위한 의도의 불씨를 보호하고 내면을 재충전합니다.',
+    },
+  ],
+
+  water: [
+    /* 0: New Moon */
+    {
+      name: '성수 정화 의식',
+      subtitle: '새로운 의도를 물에 담다',
+      time: '신월이 뜨는 저녁, 물이 고요할 때',
+      tools: ['맑은 유리 그릇', '정화된 물 또는 샘물', '흰 크리스탈(셀레나이트)', '파란 꽃잎', '소금 한 꼬집'],
+      steps: [
+        '유리 그릇에 정화된 물을 담고 소금 한 꼬집을 넣어 정화합니다.',
+        '셀레나이트를 물 위에 올리고 달빛을 받도록 창가에 둡니다.',
+        '양손으로 그릇을 감싸 쥐고 새로운 주기에 품고 싶은 의도를 물에 속삭입니다.',
+        '파란 꽃잎을 물 위에 띄우며 "물이여, 내 의도를 기억하라"고 말합니다.',
+        '다음 날 아침 이 물로 얼굴을 씻어 의도를 몸에 새깁니다.',
+      ],
+      intent: '달의 가장 고요한 순간에 물을 정화하고 의도를 주입하여, 새로운 주기가 시작될 때 깨끗한 마음의 기반을 만듭니다.',
+    },
+    /* 1: Waxing Crescent */
+    {
+      name: '흐르는 물의 소망 의식',
+      subtitle: '물의 흐름에 소원을 실어 보내다',
+      time: '초승달이 보이는 저녁 8시~10시',
+      tools: ['개울물 또는 흐르는 물', '연꽃 잎 또는 종이 배', '파란 잉크', '수정 조각', '재스민 에센셜 오일'],
+      steps: [
+        '파란 잉크로 소망 하나를 종이 배 또는 연잎에 씁니다.',
+        '재스민 오일 한 방울을 물에 떨어뜨리며 의도를 정화합니다.',
+        '수정 조각을 물에 담가 10분간 물을 충전합니다.',
+        '종이 배를 흐르는 물 위에 띄우며 "나의 소망이 우주의 흐름에 실린다"고 말합니다.',
+        '배가 시야에서 사라질 때까지 바라보며 감사를 전합니다.',
+      ],
+      intent: '초승달의 성장 에너지와 물의 유동성이 결합하여 소망이 우주의 흐름을 따라 자연스럽게 실현되도록 돕습니다.',
+    },
+    /* 2: First Quarter */
+    {
+      name: '반달의 두 물 의식',
+      subtitle: '달콤함과 쓴맛 — 두 물을 선택하다',
+      time: '상현달이 뜨는 오후~저녁',
+      tools: ['꿀물 한 잔', '쑥 우린 물 한 잔', '파란 깃털', '청금석 원석', '은색 그릇'],
+      steps: [
+        '은색 그릇에 두 잔을 놓고, 꿀물은 이루고 싶은 것, 쑥물은 놓아야 할 것을 상징합니다.',
+        '청금석을 쥐고 눈을 감으며 지금 자신에게 필요한 것이 무엇인지 물어봅니다.',
+        '파란 깃털로 두 그릇 위를 부채질하며 에너지를 활성화합니다.',
+        '꿀물을 천천히 마시며 성취를 향한 결의를 새깁니다.',
+        '쑥물을 땅에 부어 내려놓음을 실천합니다.',
+      ],
+      intent: '상현달의 결단 에너지와 물의 감정적 지혜가 합쳐져, 무엇을 얻고 무엇을 놓아야 할지 명확한 통찰을 줍니다.',
+    },
+    /* 3: Waxing Gibbous */
+    {
+      name: '달빛 수정 충전 의식',
+      subtitle: '물에 달빛을 가두다',
+      time: '달이 높이 뜨는 밤 10시~1시',
+      tools: ['큰 유리병', '정수된 물', '수정·아쿠아마린', '달맞이꽃 에센셜 오일', '파란 천'],
+      steps: [
+        '큰 유리병에 정수된 물을 가득 채웁니다.',
+        '수정과 아쿠아마린을 병 안에 넣고 달맞이꽃 오일 3방울을 떨어뜨립니다.',
+        '파란 천을 뚜껑 삼아 묶은 후 달빛이 드는 창가에 4시간 이상 둡니다.',
+        '물 앞에서 "달의 빛이여, 이 물에 깃들어 치유와 성장을 가져다오라"고 말합니다.',
+        '다음날 아침 이 달빛 물을 마시거나, 식물에 주거나, 명상 시 사용합니다.',
+      ],
+      intent: '차오르는 달의 강력한 에너지를 물에 포집하여, 치유·성장·직관을 강화하는 영적 충전수를 만듭니다.',
+    },
+    /* 4: Full Moon */
+    {
+      name: '달빛 목욕 의식',
+      subtitle: '보름달의 빛으로 몸과 영혼을 정화하다',
+      time: '보름달이 하늘에 완전히 뜬 자정 전후',
+      tools: ['목욕물', '히말라야 핑크 소금 한 컵', '라벤더·유칼립투스 오일', '달빛을 받은 물', '흰 타올', '문스톤'],
+      steps: [
+        '욕조에 따뜻한 물을 채우고 히말라야 소금과 에센셜 오일을 넣습니다.',
+        '달빛 물(미리 받아둔 것)을 욕조에 붓고 "보름달의 빛이여, 이 물에 충만하라"고 말합니다.',
+        '욕조에 들어가 눈을 감고 달빛이 온몸을 씻어준다고 상상합니다.',
+        '문스톤을 배 위에 올리고 20분간 달의 에너지를 온몸으로 받아들입니다.',
+        '물이 빠져나갈 때 모든 부정적인 에너지도 함께 빠져나간다고 시각화합니다.',
+      ],
+      intent: '보름달의 절정 에너지와 물의 정화력이 최대로 결합되는 신성한 목욕 의식. 몸과 마음의 깊은 정화와 새로운 에너지로의 재탄생을 경험합니다.',
+    },
+    /* 5: Waning Gibbous */
+    {
+      name: '감사의 물 의식',
+      subtitle: '흘러온 은혜를 물에 담아 기리다',
+      time: '저녁 식사 후, 조용한 시간',
+      tools: ['차가운 물 한 컵', '따뜻한 허브 차', '감사 노트', '파란 크리스탈', '진달래 또는 국화 꽃'],
+      steps: [
+        '차가운 물 한 컵과 따뜻한 허브 차를 나란히 놓습니다.',
+        '꽃잎 몇 장을 물 위에 띄우고 파란 크리스탈을 옆에 놓습니다.',
+        '감사 노트에 이번 달 물처럼 흘러온 좋은 일들을 적습니다.',
+        '각 감사를 소리 내어 읽으며 허브 차를 한 모금씩 마십니다.',
+        '차가운 물을 창밖에 뿌리며 "나는 모든 흘러온 은혜에 감사한다"고 말합니다.',
+      ],
+      intent: '이지러지는 달의 감사 에너지와 물의 수용성이 합쳐, 풍요에 대한 깊은 인정을 통해 더 큰 흐름을 불러들입니다.',
+    },
+    /* 6: Last Quarter */
+    {
+      name: '눈물의 방류 의식',
+      subtitle: '물에 감정을 실어 흘려보내다',
+      time: '하현달이 뜨는 자정 이후',
+      tools: ['작은 그릇에 담긴 물', '소금', '짙은 파란색 천', '내려놓을 감정을 적은 종이', '파란 초'],
+      steps: [
+        '파란 초를 켜고 그 빛만으로 의식을 진행합니다.',
+        '그릇에 소금물을 만들며 눈물처럼 정화하는 소금의 힘을 떠올립니다.',
+        '내려놓을 감정이나 관계를 종이에 적은 후 소금물에 담급니다.',
+        '종이가 물에 녹으면서 그 감정도 함께 녹아 정화된다고 시각화합니다.',
+        '물을 화장실에서 흘려보내며 "나는 이 감정을 감사히 떠나보낸다"고 말합니다.',
+      ],
+      intent: '하현달과 물의 방류 에너지가 합쳐져, 묵은 감정과 집착을 안전하게 흘려보내고 감정적 자유를 회복합니다.',
+    },
+    /* 7: Waning Crescent */
+    {
+      name: '물의 자궁 명상 의식',
+      subtitle: '달이 잠들기 전, 물 속에서 새로 태어날 준비를 하다',
+      time: '새벽 4시~6시, 동이 트기 직전',
+      tools: ['작은 대야 또는 그릇', '정화된 물', '달맞이꽃', '진주 또는 문스톤', '흰 천'],
+      steps: [
+        '대야에 물을 채우고 달맞이꽃을 띄웁니다.',
+        '진주 또는 문스톤을 물에 담가 충전합니다.',
+        '양손을 물에 담그고 눈을 감은 채 물이 어머니의 자궁처럼 당신을 품는다고 상상합니다.',
+        '다음 달 새로운 주기에 다시 태어날 자신의 모습을 물에게 속삭입니다.',
+        '흰 천으로 손을 닦으며 "나는 깨끗하고, 준비되어 있다"고 말합니다.',
+      ],
+      intent: '그믐달의 깊은 휴식과 물의 재생력이 합쳐져, 다음 주기를 위한 영적 재탄생과 내면의 정화를 완성합니다.',
+    },
+  ],
+
+  earth: [
+    /* 0: New Moon */
+    {
+      name: '씨앗 심기 의식',
+      subtitle: '땅에 의도를 씨앗으로 심다',
+      time: '신월 저녁, 해가 지고 별이 나올 때',
+      tools: ['작은 화분 또는 흙', '실제 씨앗', '초록 크리스탈(어벤튜린)', '소원을 쓴 종이', '물'],
+      steps: [
+        '화분에 흙을 담고 소원을 쓴 종이를 접어 가장 아래에 넣습니다.',
+        '어벤튜린을 흙 위에 올려 3분간 손으로 덮으며 의도를 땅에 전합니다.',
+        '씨앗을 손바닥에 올리고 "이 씨앗처럼 내 의도도 뿌리를 내리고 자란다"고 말합니다.',
+        '씨앗을 심고 물을 주며 "땅이여, 나의 소망을 품어주오"라고 속삭입니다.',
+        '화분을 달빛이 닿는 곳에 두고 매일 돌봄으로써 의도를 키워나갑니다.',
+      ],
+      intent: '신월의 새로운 시작 에너지와 흙의 생명력이 합쳐져, 의도를 물리적 씨앗에 연결하고 매일의 돌봄 속에서 실현시킵니다.',
+    },
+    /* 1: Waxing Crescent */
+    {
+      name: '대지의 뿌리 내리기 의식',
+      subtitle: '흔들리지 않는 기반을 만들다',
+      time: '초승달이 뜨는 저녁, 맨발로 땅을 밟으며',
+      tools: ['맨발', '흙이나 잔디', '소금', '적철석(헤마타이트)', '쑥 번들'],
+      steps: [
+        '맨발로 흙이나 잔디 위에 서서 지구와 연결됨을 느낍니다.',
+        '쑥 번들을 태워 연기로 몸 주위를 정화합니다.',
+        '헤마타이트를 각 손에 하나씩 쥐고 눈을 감습니다.',
+        '발끝에서 에너지가 땅속 깊이 뿌리 내린다고 상상하며 10번 깊이 호흡합니다.',
+        '"나는 땅처럼 굳건하고, 산처럼 안정적이다"고 10번 반복합니다.',
+      ],
+      intent: '초승달의 성장 에너지와 대지의 안정성이 결합하여, 불안함을 해소하고 삶의 견고한 기반을 다집니다.',
+    },
+    /* 2: First Quarter */
+    {
+      name: '돌 결정 의식',
+      subtitle: '돌처럼 단단한 결정을 내리다',
+      time: '상현달이 뜨는 저녁, 자연석이 있는 곳에서',
+      tools: ['큰 자연석', '검은 터마린', '종이와 펜', '흙', '나무 막대기'],
+      steps: [
+        '큰 자연석을 앞에 두고 종이에 결정해야 할 상황을 적습니다.',
+        '나무 막대기로 흙 위에 두 가지 선택지를 씁니다.',
+        '검은 터마린을 쥐고 직관이 이끄는 선택지 쪽으로 걸어갑니다.',
+        '선택한 쪽의 땅을 손으로 짚으며 "나는 이 땅처럼 확고히 결정한다"고 말합니다.',
+        '선택하지 않은 글씨를 흙 위에서 지우며 내려놓습니다.',
+      ],
+      intent: '상현달의 결단력과 대지의 불변성이 합쳐, 흔들림 없는 강인한 결정을 내릴 수 있는 힘을 부여합니다.',
+    },
+    /* 3: Waxing Gibbous */
+    {
+      name: '풍요의 대지 의식',
+      subtitle: '차오르는 달처럼 물질적 풍요를 끌어당기다',
+      time: '달이 높이 뜨는 밤, 정원이나 화분 옆에서',
+      tools: ['녹색 촛불', '계피·정향·너트메그 블렌드', '동전 7개', '초록 천', '시트린'],
+      steps: [
+        '녹색 촛불 주위에 동전 7개를 원형으로 배치합니다.',
+        '계피·정향 블렌드를 초 옆에 피워 풍요의 향기를 채웁니다.',
+        '시트린을 쥐고 풍요롭고 번영한 자신의 모습을 생생하게 시각화합니다.',
+        '"풍요는 자연처럼 자연스럽게 내게 흐른다"고 7번 반복합니다.',
+        '동전을 초록 천에 싸서 지갑 속에 넣어 풍요의 부적으로 보관합니다.',
+      ],
+      intent: '차오르는 달과 대지의 풍요 에너지가 결합하여, 물질적·감정적 풍요를 자석처럼 끌어당기는 힘을 활성화합니다.',
+    },
+    /* 4: Full Moon */
+    {
+      name: '수확 감사 의식',
+      subtitle: '보름달 아래, 대지의 선물에 감사를 바치다',
+      time: '보름달이 중천에 뜨는 자정, 야외에서',
+      tools: ['과일·채소·곡식', '흙 그릇', '흰 꽃', '초록 천', '모스 아게이트'],
+      steps: [
+        '야외에 초록 천을 펼치고 과일과 채소, 곡식을 올려 대지의 제단을 만듭니다.',
+        '흰 꽃을 사방에 놓고 모스 아게이트를 중앙에 배치합니다.',
+        '무릎을 꿇거나 앉아서 손으로 흙이나 땅을 짚으며 땅의 온기를 느낍니다.',
+        '이번 달 이룬 것, 받은 것들을 소리 내어 말하며 감사를 전합니다.',
+        '"대지여, 당신의 풍요로움에 감사합니다. 나는 받았고, 나는 감사합니다"고 선언합니다.',
+      ],
+      intent: '보름달의 완전한 에너지와 대지의 수확 에너지가 만나는 가장 강력한 감사 의식. 풍요 의식을 깊이 실천하고 순환을 완성합니다.',
+    },
+    /* 5: Waning Gibbous */
+    {
+      name: '퇴비 의식',
+      subtitle: '낡은 것을 땅에 돌려보내다',
+      time: '저녁, 정원이나 화분 근처에서',
+      tools: ['낡은 유기물(식물 찌꺼기, 음식 껍질)', '작은 삽', '흙', '현무암', '세이지'],
+      steps: [
+        '세이지를 태워 공간을 정화합니다.',
+        '더 이상 필요 없는 것을 상징하는 유기물을 모읍니다.',
+        '현무암을 쥐고 변환의 의도를 담습니다.',
+        '땅이나 화분에 구멍을 파고 유기물을 넣으며 "나는 이것을 대지에 돌려보내 새로운 생명으로 태어나게 한다"고 말합니다.',
+        '흙으로 덮으며 변환과 재생의 과정이 시작됨을 느낍니다.',
+      ],
+      intent: '이지러지는 달과 대지의 순환 에너지가 합쳐져, 불필요한 것을 자연으로 돌려보내고 변환과 재생의 흐름에 합류합니다.',
+    },
+    /* 6: Last Quarter */
+    {
+      name: '뿌리 정리 의식',
+      subtitle: '대지처럼 내면을 정리하고 균형을 찾다',
+      time: '하현달이 뜨는 자정, 실내 혹은 야외',
+      tools: ['작은 삽 또는 손', '돌멩이', '흙', '오닉스', '내려놓을 목록 종이'],
+      steps: [
+        '내려놓을 것들의 목록을 종이에 적습니다.',
+        '오닉스를 쥐고 눈을 감은 채 뿌리가 땅속 깊이 내려가는 시각화를 합니다.',
+        '각 항목을 읽으며 그에 해당하는 돌멩이 하나씩을 땅에 놓습니다.',
+        '돌멩이들을 다시 집어 땅 깊이 묻으며 "나는 이것을 땅에 돌려보낸다"고 말합니다.',
+        '빈 손을 땅에 짚고 대지의 안정감을 느끼며 정화를 완성합니다.',
+      ],
+      intent: '하현달의 정리 에너지와 대지의 안정성이 합쳐져, 내면의 혼란을 땅에 넘기고 균형과 고요함을 되찾습니다.',
+    },
+    /* 7: Waning Crescent */
+    {
+      name: '동면의 씨앗 의식',
+      subtitle: '겨울 씨앗처럼 다음 주기를 위해 잠드는 의식',
+      time: '새벽 5시~7시, 해가 뜨기 전',
+      tools: ['작은 씨앗', '흙', '검은 천', '흑요석', '깊이 호흡'],
+      steps: [
+        '흑요석을 쥐고 지난 달 주기 동안 자신이 무엇을 이루었는지 조용히 돌아봅니다.',
+        '씨앗을 손에 쥐고 다음 달 자신이 꽃피울 모습을 담습니다.',
+        '흙 속 깊이 씨앗을 심으며 "나는 준비 중이고, 때가 오면 꽃필 것이다"고 말합니다.',
+        '검은 천을 화분 위에 덮어 씨앗이 어둠 속에서 힘을 모으도록 합니다.',
+        '신월이 될 때까지 화분을 돌보며 다음 주기를 기다립니다.',
+      ],
+      intent: '그믐달의 깊은 휴식과 대지의 동면 에너지가 합쳐져, 다음 주기를 위한 잠재력을 보존하고 재충전합니다.',
+    },
+  ],
+
+  air: [
+    /* 0: New Moon */
+    {
+      name: '새벽 숨결 의식',
+      subtitle: '향연기에 의도를 실어 하늘로 날리다',
+      time: '자정 또는 새벽 3시~5시, 창문을 열고',
+      tools: ['향 스틱(재스민 또는 프랑킨센스)', '깃털', '소원을 적은 얇은 종이', '청금석 또는 라피스라줄리', '밤바람'],
+      steps: [
+        '창문 또는 문을 열어 신선한 바람이 들어오도록 합니다.',
+        '향 스틱을 켜고 깃털로 연기를 몸 주위에 부채질하며 정화합니다.',
+        '얇은 종이에 새로운 의도를 씁니다.',
+        '청금석을 쥐고 3번 깊게 호흡하며 의도를 숨에 담습니다.',
+        '종이를 향 연기 위에 흔들며 "바람이여, 내 의도를 우주에 전하라"고 말한 뒤 바람에 날립니다.',
+      ],
+      intent: '신월의 고요함 속에서 바람의 전달력을 이용해 의도를 우주에 발신합니다. 생각이 현실이 되는 첫 번째 단계입니다.',
+    },
+    /* 1: Waxing Crescent */
+    {
+      name: '바람의 속삭임 의식',
+      subtitle: '초승달과 바람에게 비밀 소원을 속삭이다',
+      time: '초승달이 보이는 저녁, 야외에서',
+      tools: ['향 연기', '풍경(윈드벨)', '소원을 적은 리본', '보라색 초', '깃털 하나'],
+      steps: [
+        '야외에서 풍경을 바람이 부는 곳에 달아 소리가 울리게 합니다.',
+        '보라색 초를 켜고 향을 피웁니다.',
+        '소원을 적은 리본을 나뭇가지 또는 창틀에 묶습니다.',
+        '눈을 감고 바람이 불어올 때마다 소원이 하나씩 이루어진다고 상상합니다.',
+        '"초승달과 바람이여, 내 소원을 우주에 전하라"고 속삭입니다.',
+      ],
+      intent: '초승달의 성장 에너지와 바람의 전달력이 합쳐, 소원이 우주로 전달되어 점점 현실에 가까워지도록 합니다.',
+    },
+    /* 2: First Quarter */
+    {
+      name: '바람의 결단 의식',
+      subtitle: '두 방향의 바람 중 하나를 선택하다',
+      time: '상현달이 뜨는 저녁, 바람이 부는 곳에서',
+      tools: ['두 개의 깃털', '흰 종이 두 장', '보라색 잉크', '세이지 번들', '나침반'],
+      steps: [
+        '세이지를 태워 공간을 정화하고 바람에 연기를 흘려보냅니다.',
+        '두 장의 흰 종이에 두 가지 선택지를 보라색 잉크로 씁니다.',
+        '나침반으로 동쪽(새로운 시작)과 서쪽(내려놓음)을 확인합니다.',
+        '두 깃털에 각각 선택지를 묶고 바람에 날려 어느 쪽이 더 빨리, 더 멀리 날아가는지 봅니다.',
+        '바람이 선택해준 방향을 직관적 신호로 받아들이고 결정합니다.',
+      ],
+      intent: '상현달의 결단 에너지와 바람의 자유로운 지혜가 결합하여, 분석보다 직관과 자연의 신호로 결정하는 법을 가르쳐 줍니다.',
+    },
+    /* 3: Waxing Gibbous */
+    {
+      name: '상승 기류 명상 의식',
+      subtitle: '바람처럼 높이 올라라',
+      time: '달이 높이 뜨는 밤, 창가나 옥상에서',
+      tools: ['인센스(용혈목 또는 유향)', '하늘색 초', '아메시스트', '달빛 아래 4분간 충전한 물', '바람'],
+      steps: [
+        '하늘색 초를 켜고 인센스로 공간을 채웁니다.',
+        '아메시스트를 이마(제3의 눈)에 대고 30초간 유지합니다.',
+        '달빛 물 한 모금을 마시며 정화합니다.',
+        '눈을 감고 바람이 몸을 들어올려 하늘 위를 자유롭게 날아가는 상상을 10분간 합니다.',
+        '돌아올 때 새로운 통찰이 있으면 종이에 바로 적습니다.',
+      ],
+      intent: '차오르는 달의 에너지와 바람의 상승력이 합쳐져, 창의적 영감과 직관적 통찰이 폭발적으로 활성화됩니다.',
+    },
+    /* 4: Full Moon */
+    {
+      name: '달빛 바람 명상 의식',
+      subtitle: '보름달과 바람 속에서 깊은 호흡으로 합일하다',
+      time: '보름달이 중천에 뜨는 자정',
+      tools: ['야외 또는 열린 창가', '향 연기', '아메시스트·셀레스타이트', '흰색 옷', '바람과 달빛'],
+      steps: [
+        '흰색 옷을 입고 야외 혹은 창가에서 보름달을 바라봅니다.',
+        '향을 피우고 연기가 바람에 자유롭게 흘러가도록 놓아둡니다.',
+        '아메시스트와 셀레스타이트를 양손에 하나씩 쥡니다.',
+        '보름달을 바라보며 4-7-8 호흡 (4초 들이쉬고, 7초 참고, 8초 내쉬기)을 10회 합니다.',
+        '"나는 달빛이고, 나는 바람이다. 나는 자유롭고 완전하다"고 선언합니다.',
+      ],
+      intent: '보름달과 바람의 절정 에너지 속에서 가장 깊은 명상에 들어갑니다. 자아의 경계가 허물어지고 우주와 하나가 되는 경험을 합니다.',
+    },
+    /* 5: Waning Gibbous */
+    {
+      name: '감사의 향연기 의식',
+      subtitle: '연기처럼 은혜를 하늘로 올려보내다',
+      time: '저녁, 창문을 열고',
+      tools: ['감사 인센스(장미나무)', '깃털', '감사 일지', '파란색 크리스탈', '바람'],
+      steps: [
+        '장미나무 인센스를 켜고 깃털로 연기를 사방에 부채질합니다.',
+        '감사 일지에 이번 달 감사한 것을 적으며 각각 "감사합니다"라고 속삭입니다.',
+        '파란 크리스탈을 쥐고 감사한 마음을 담습니다.',
+        '일지를 읽으며 각 감사의 연기를 창밖으로 흘려보냅니다.',
+        '"내 감사의 말이 바람을 타고 우주에 닿아, 더 많은 은혜로 돌아온다"고 말합니다.',
+      ],
+      intent: '이지러지는 달의 감사 에너지와 바람의 전달력이 합쳐져, 감사가 우주에 전달되고 증폭되어 더 큰 풍요로 돌아옵니다.',
+    },
+    /* 6: Last Quarter */
+    {
+      name: '바람의 정화 의식',
+      subtitle: '묵은 생각과 신념을 바람에 날려보내다',
+      time: '하현달이 뜨는 자정, 바람이 부는 날',
+      tools: ['세이지 또는 팔로 산토', '깃털', '내려놓을 생각을 적은 얇은 종이', '라피스라줄리', '바람'],
+      steps: [
+        '세이지 또는 팔로 산토를 태워 몸 주위를 깃털로 정화합니다.',
+        '내려놓을 생각, 부정적 신념, 걱정을 종이에 적습니다.',
+        '라피스라줄리를 쥐고 그 생각들이 더 이상 진실이 아님을 확인합니다.',
+        '야외에서 종이를 찢어 바람에 날리며 "나는 이 생각들을 바람에 돌려보낸다"고 말합니다.',
+        '눈을 감고 머릿속이 바람이 쓸고 간 것처럼 맑아진다고 상상합니다.',
+      ],
+      intent: '하현달의 내려놓음 에너지와 바람의 자유로운 정화력이 합쳐져, 정신적 블록과 부정적 신념 체계를 깨끗이 씻어냅니다.',
+    },
+    /* 7: Waning Crescent */
+    {
+      name: '고요한 바람의 의식',
+      subtitle: '바람이 잠들기 전, 내면의 소리를 듣다',
+      time: '새벽 4시~6시, 가장 조용한 시간',
+      tools: ['무향 인센스 또는 향나무', '흰 깃털', '일기장', '라벤더 향주머니', '침묵'],
+      steps: [
+        '인센스를 켜고 흰 깃털을 가슴에 품습니다.',
+        '라벤더 향주머니를 베개 옆에 두거나 향기를 맡으며 긴장을 풉니다.',
+        '완전한 침묵 속에 5~10분 앉아 마음에서 떠오르는 소리에 귀 기울입니다.',
+        '내면에서 들리는 메시지를 일기장에 자동 기술(auto-writing)로 적습니다.',
+        '"바람처럼 자유롭고, 공기처럼 투명한 나 자신을 나는 받아들인다"고 속삭입니다.',
+      ],
+      intent: '그믐달의 깊은 고요와 바람의 정보 전달력이 합쳐져, 내면 깊은 곳의 직관과 우주의 메시지를 수신하는 시간을 만듭니다.',
+    },
+  ],
+};
+
+/* =============================================
+   APP STATE
+============================================= */
+let currentElement = localStorage.getItem('luna_element') || 'air';
+let currentPhaseData = null;
+
+/* =============================================
+   DATE DISPLAY
+============================================= */
+function updateDate() {
+  const now = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+  document.getElementById('current-date').textContent =
+    now.toLocaleDateString('ko-KR', options);
+}
+
+/* =============================================
+   MOON UPDATE
+============================================= */
+function updateMoon() {
+  const now = new Date();
+  const { age, illumination, phaseIndex } = getLunarPhase(now);
+  currentPhaseData = { age, illumination, phaseIndex };
+
+  const phase = PHASES[phaseIndex];
+
+  document.getElementById('moon-phase-en').textContent = phase.emoji + '  ' + phase.en;
+  document.getElementById('moon-phase-ko').textContent = phase.ko;
+  document.getElementById('moon-illum-text').textContent = `달의 밝기 ${illumination}% · 달 나이 ${age.toFixed(1)}일`;
+  document.getElementById('moon-energy-desc').textContent = PHASE_ENERGY[phaseIndex];
+
+  renderMoonSVG(age, phaseIndex);
+}
+
+/* =============================================
+   ELEMENT SELECTION
+============================================= */
+function selectElement(el) {
+  currentElement = el;
+  localStorage.setItem('luna_element', el);
+
+  // Update button states
+  document.querySelectorAll('.elem-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.elem-btn.${el}`).classList.add('active');
+
+  // Update app theme
+  const app = document.getElementById('app');
+  app.className = `theme-${el}`;
+
+  // Update ritual section
+  updateRitual();
+
+  // Re-render tarot intro with current element/phase
+  if (document.getElementById('tarot-result') && localStorage.getItem(getTodayKey())) {
+    renderTarot();
+  }
+}
+
+/* =============================================
+   RITUAL CONTENT
+============================================= */
+const ELEMENT_LABELS = { fire: '🔥 불 (Fire)', water: '💧 물 (Water)', earth: '🌿 흙 (Earth)', air: '💨 바람 (Air)' };
+
+function updateRitual() {
+  const section = document.getElementById('ritual-section');
+  if (!currentPhaseData) return;
+
+  const { phaseIndex } = currentPhaseData;
+  const phase = PHASES[phaseIndex];
+  const ritual = RITUALS[currentElement][phaseIndex];
+  const elemLabel = ELEMENT_LABELS[currentElement];
+
+  section.innerHTML = '';
+  section.classList.remove('fade-in');
+  void section.offsetWidth; // reflow
+  section.classList.add('fade-in');
+
+  section.innerHTML = `
+    <div class="ritual-header">
+      <div class="ritual-title">✦ ${ritual.name}</div>
+      <div class="ritual-subtitle">${ritual.subtitle}</div>
+      <div style="margin-top:8px; font-size:11px; color:var(--clr-text-dim); font-family:'Cinzel',serif; letter-spacing:2px;">
+        ${phase.emoji} ${phase.ko} &nbsp;·&nbsp; ${elemLabel}
+      </div>
+    </div>
+
+    <div class="ritual-card">
+      <div class="card-label">
+        <span class="card-label-icon">🕐</span>
+        <span class="card-label-text">의식 시간</span>
+      </div>
+      <div class="card-content">${ritual.time}</div>
+    </div>
+
+    <div class="ritual-card">
+      <div class="card-label">
+        <span class="card-label-icon">🧰</span>
+        <span class="card-label-text">필요한 도구</span>
+      </div>
+      <ul class="tools-list">
+        ${ritual.tools.map(t => `<li>${t}</li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="ritual-card">
+      <div class="card-label">
+        <span class="card-label-icon">📜</span>
+        <span class="card-label-text">의식 절차</span>
+      </div>
+      <ol class="steps-list">
+        ${ritual.steps.map(s => `<li><span>${s}</span></li>`).join('')}
+      </ol>
+    </div>
+
+    <div class="ritual-card">
+      <div class="card-label">
+        <span class="card-label-icon">✨</span>
+        <span class="card-label-text">의도 / 목적</span>
+      </div>
+      <div class="intent-text">${ritual.intent}</div>
+    </div>
+  `;
+}
+
+
+
+/* =============================================
+   SHARE / QR / YOUTUBE
+============================================= */
+const YOUTUBE_URL = 'https://www.youtube.com/@cursekey';
+
+function getShareUrl() {
+  try {
+    return `${location.origin}${location.pathname}`;
+  } catch (e) {
+    return location.href;
+  }
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function buildQrUrl(url) {
+  const encoded = encodeURIComponent(url);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encoded}`;
+}
+
+function setQrImage(url) {
+  const img = document.getElementById('qr-image');
+  if (!img) return;
+  const primary = buildQrUrl(url);
+  const fallback = `https://quickchart.io/qr?text=${encodeURIComponent(url)}&size=220`;
+  img.onerror = () => {
+    if (!img.dataset.fallback) {
+      img.dataset.fallback = '1';
+      img.src = fallback;
+    } else {
+      showToast('QR 이미지를 불러오지 못했어요. 아래 링크를 복사해 주세요.');
+    }
+  };
+  img.removeAttribute('data-fallback');
+  img.src = primary;
+}
+
+function openQrModal() {
+  const modal = document.getElementById('qr-modal');
+  const shareUrl = getShareUrl();
+  document.getElementById('share-url').textContent = shareUrl;
+  setQrImage(shareUrl);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeQrModal() {
+  const modal = document.getElementById('qr-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+async function copyShareUrl() {
+  const shareUrl = getShareUrl();
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(shareUrl);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = shareUrl;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    showToast('링크를 복사했어요 ✨');
+  } catch (e) {
+    showToast('복사에 실패했어요. 링크를 길게 눌러 복사해 주세요.');
+  }
+}
+
+async function nativeShare() {
+  const shareUrl = getShareUrl();
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: 'Luna Elementum',
+        text: '달 위상 · 4원소 의식 · 루나 타로 앱',
+        url: shareUrl
+      });
+      return;
+    }
+    await copyShareUrl();
+  } catch (e) {
+    if (String(e).includes('AbortError')) return;
+    await copyShareUrl();
+  }
+}
+
+/* =============================================
+   TAROT DATA / DAILY DRAW
+============================================= */
+const TAROT_PHASE_INTROS = {
+  fire: [
+    '신월의 어둠 속에서 불의 씨앗이 다시 타오릅니다. 카드는 당신의 시작을 비춥니다.',
+    '초승달의 불꽃이 작게 흔들리며 행동을 재촉합니다. 지금의 열망을 카드가 드러냅니다.',
+    '상현달의 불은 결단을 요구합니다. 과감한 선택이 어디를 향하는지 읽어보세요.',
+    '차오르는 달빛 아래 불의 기세가 커집니다. 성장을 밀어붙이는 힘이 보입니다.',
+    '보름달의 불꽃은 절정입니다. 가장 강한 욕망과 성취의 방향을 카드가 보여줍니다.',
+    '이지러지는 달빛 속에서도 불씨는 남아 있습니다. 무엇을 남기고 무엇을 내려둘지 읽습니다.',
+    '하현달의 불은 정리와 재정비를 말합니다. 남은 에너지를 어디에 쓸지 카드가 안내합니다.',
+    '그믐달의 잔불은 내면의 의지를 지켜냅니다. 다음 시작을 위해 조용히 메시지를 받으세요.'
+  ],
+  water: [
+    '신월의 고요한 물 위로 무의식이 떠오릅니다. 카드는 감정의 진짜 흐름을 보여줍니다.',
+    '초승달이 물결을 깨우듯, 마음속 작은 떨림이 커지고 있습니다. 오늘의 감정을 읽어보세요.',
+    '상현달의 물은 균형을 묻습니다. 관계와 감정 속에서 어떤 조율이 필요한지 보입니다.',
+    '차오르는 달의 물은 직관을 키웁니다. 감정의 깊은 층에서 답을 건져 올릴 시간입니다.',
+    '보름달의 물은 감정을 크게 증폭합니다. 진심과 공명을 카드가 또렷하게 비춥니다.',
+    '이지러지는 물결은 감정의 찌꺼기를 씻어냅니다. 보내야 할 감정을 확인하세요.',
+    '하현달의 물은 치유와 휴식을 권합니다. 마음을 가볍게 하는 메시지가 옵니다.',
+    '그믐달의 물은 꿈과 직관의 문을 엽니다. 잔잔한 수면 아래 답이 숨어 있습니다.'
+  ],
+  earth: [
+    '신월의 땅에는 새로운 씨앗을 묻기 좋습니다. 오늘의 카드는 현실적 시작점을 알려줍니다.',
+    '초승달 아래의 땅은 천천히 움직입니다. 작은 실천이 어떤 결실로 이어질지 보세요.',
+    '상현달의 땅은 구조와 안정의 균형을 요구합니다. 생활의 기반을 다시 정돈할 시간입니다.',
+    '차오르는 달빛은 땅의 결실을 준비시킵니다. 성장을 위해 필요한 자원을 카드가 말합니다.',
+    '보름달의 땅은 풍요가 무르익는 자리입니다. 성과와 책임을 함께 읽어보세요.',
+    '이지러지는 달빛 속 땅은 수확 후 정리를 시작합니다. 남길 것과 비울 것을 가려냅니다.',
+    '하현달의 땅은 생활 리듬을 다시 세우게 합니다. 실질적인 회복 메시지가 옵니다.',
+    '그믐달의 땅은 깊은 휴면 속 재충전을 합니다. 조용히 다가오는 현실적 힌트를 받아보세요.'
+  ],
+  air: [
+    '신월의 정적 속 공기가 속삭입니다. 카드가 생각의 방향과 숨은 신호를 전합니다.',
+    '초승달의 바람이 비밀스러운 소원을 움직입니다. 지금의 바람과 아이디어를 읽어보세요.',
+    '상현달의 공기는 판단과 선택을 예리하게 합니다. 머릿속 안개를 걷는 메시지가 옵니다.',
+    '차오르는 달의 바람은 소식을 데려옵니다. 변화의 흐름이 어디서 오는지 카드가 말합니다.',
+    '보름달의 공기는 직관과 계시를 번쩍이게 합니다. 강한 통찰의 순간을 포착하세요.',
+    '이지러지는 바람은 오래된 생각을 흩뜨립니다. 비워야 할 패턴이 드러납니다.',
+    '하현달의 공기는 정리와 분별을 돕습니다. 무엇을 남기고 무엇을 끊어야 할지 보입니다.',
+    '그믐달의 고요한 바람은 내면의 음성을 선명하게 합니다. 새로운 생각이 들어올 자리를 만드세요.'
+  ]
+};
+
+const MAJOR_ARCANA = [
+  ['바보','The Fool','🕊️',['시작','순수','도약'],'새로운 길이 열립니다. 두려움보다 호기심을 따르세요.','충동과 방황이 커질 수 있습니다. 준비를 다시 확인하세요.'],
+  ['마법사','The Magician','✨',['의지','창조','집중'],'필요한 도구는 이미 당신 안에 있습니다. 의도를 현실로 옮기세요.','에너지가 흩어지고 있습니다. 집중 대상을 하나로 좁혀보세요.'],
+  ['여사제','The High Priestess','🌙',['직관','비밀','내면'],'답은 바깥보다 내면에 가까이 있습니다. 조용히 감각을 믿으세요.','과한 의심이 직관을 덮고 있습니다. 잠시 멈추고 몸의 신호를 들어보세요.'],
+  ['여황제','The Empress','🌹',['풍요','창조','돌봄'],'풍요가 자라고 있습니다. 돌본 만큼 따뜻한 결과가 돌아옵니다.','과소비나 과잉보호를 경계하세요. 풍요에도 균형이 필요합니다.'],
+  ['황제','The Emperor','👑',['질서','구조','안정'],'기반을 세우기에 좋은 날입니다. 원칙을 세우면 힘이 붙습니다.','완고함이 흐름을 막을 수 있습니다. 유연함을 조금 허용하세요.'],
+  ['교황','The Hierophant','📿',['전통','가르침','의미'],'배움과 조언이 길을 밝혀줍니다. 이미 검증된 지혜를 활용하세요.','남의 기준에만 갇히지 마세요. 지금은 나만의 해석도 필요합니다.'],
+  ['연인','The Lovers','💞',['연결','선택','조화'],'중요한 선택에서 마음과 가치가 일치할 수 있습니다. 진심을 선택하세요.','관계나 선택의 균형이 흔들립니다. 욕망과 가치의 차이를 점검하세요.'],
+  ['전차','The Chariot','🏇',['추진력','승리','의지'],'흔들림 속에서도 방향을 잡으면 앞으로 나아갑니다. 주도권을 쥐세요.','조급함이 길을 벗어나게 할 수 있습니다. 속도보다 방향을 먼저 맞추세요.'],
+  ['힘','Strength','🦁',['용기','인내','다정함'],'강한 것은 억누름이 아니라 다루는 힘입니다. 부드럽게 버텨내세요.','감정 소모가 큽니다. 자신을 다그치기보다 회복할 시간을 주세요.'],
+  ['은둔자','The Hermit','🏮',['성찰','고독','탐색'],'혼자만의 시간이 깊은 통찰을 줍니다. 잠시 뒤로 물러나도 괜찮습니다.','고립이 길어질 수 있습니다. 믿을 수 있는 한 사람과 연결을 회복하세요.'],
+  ['운명의 수레바퀴','Wheel of Fortune','🎡',['전환','순환','기회'],'흐름이 바뀌는 시점입니다. 우연처럼 보이는 기회를 놓치지 마세요.','원치 않는 변동이 올 수 있습니다. 흐름을 거스르기보다 대응력을 키우세요.'],
+  ['정의','Justice','⚖️',['균형','진실','책임'],'진실이 드러나고 균형이 회복됩니다. 공정한 선택이 중요합니다.','감정이 판단을 흐릴 수 있습니다. 사실과 해석을 분리해 보세요.'],
+  ['매달린 사람','The Hanged Man','🪢',['전환점','유예','관점'],'멈춤은 실패가 아니라 시야를 바꾸는 시간입니다. 다른 각도로 보세요.','지연이 길어질 수 있습니다. 내려놓을 것과 붙잡을 것을 가려내세요.'],
+  ['죽음','Death','🕯️',['끝','변형','재생'],'하나의 장이 끝나고 새 순환이 시작됩니다. 변화를 받아들이면 길이 열립니다.','끝내야 할 것을 미루고 있습니다. 낡은 껍질을 벗어야 다음이 옵니다.'],
+  ['절제','Temperance','🏺',['조화','치유','흐름'],'서로 다른 것이 아름답게 섞입니다. 무리하지 말고 적절히 조율하세요.','균형 감각이 흔들립니다. 생활 리듬을 다시 맞춰보세요.'],
+  ['악마','The Devil','⛓️',['집착','유혹','본능'],'욕망의 힘을 자각하면 오히려 자유가 생깁니다. 무엇에 묶였는지 보세요.','습관적 집착이 커질 수 있습니다. 끊어낼 선을 분명히 정하세요.'],
+  ['탑','The Tower','⚡',['충격','붕괴','해방'],'갑작스러운 변화가 오더라도 가짜 기반을 무너뜨리는 정화일 수 있습니다.','불안이 커질 수 있습니다. 무너짐 속에서도 지켜야 할 핵심을 붙드세요.'],
+  ['별','The Star','⭐',['희망','치유','영감'],'어둠 뒤에 희망의 빛이 보입니다. 회복과 영감이 함께 옵니다.','희망을 너무 빨리 포기하지 마세요. 작은 신호도 회복의 시작입니다.'],
+  ['달','The Moon','🌔',['환상','직관','무의식'],'모든 것이 선명하지 않아도 괜찮습니다. 꿈과 직관 속 메시지를 읽으세요.','두려움이 상상을 키웁니다. 사실 확인과 감정 구분이 필요합니다.'],
+  ['태양','The Sun','☀️',['기쁨','성공','명료'],'밝은 성과와 자신감이 따라옵니다. 숨기지 말고 환하게 드러내세요.','과한 낙관이나 과시를 조절하세요. 진짜 빛은 안정감에서 나옵니다.'],
+  ['심판','Judgement','📯',['각성','부름','정리'],'과거를 정리하고 새 단계로 넘어갈 호출이 왔습니다. 응답하세요.','자기비판이 지나칩니다. 과거를 정리하되 스스로를 묶지 마세요.'],
+  ['세계','The World','🌐',['완성','통합','확장'],'하나의 순환이 아름답게 완성됩니다. 이제 더 넓은 세계로 나아갈 때입니다.','마무리를 미루지 마세요. 완성은 새로운 출발을 위해 필요합니다.']
+].map((c, idx) => ({
+  id: idx + 1,
+  arcana: 'major',
+  nameKo: c[0],
+  nameEn: c[1],
+  symbol: c[2],
+  keywords: c[3],
+  upMsg: c[4],
+  revMsg: c[5],
+  suit: 'major'
+}));
+
+const SUITS = {
+  wands: { nameKo: '완드', nameEn: 'Wands', symbol: '🔥', theme: ['열정','행동','창조'], up: '열정이 현실을 움직입니다.', rev: '조급함보다 페이스 조절이 필요합니다.' },
+  cups: { nameKo: '컵', nameEn: 'Cups', symbol: '💧', theme: ['감정','관계','직관'], up: '감정이 관계를 깊게 연결합니다.', rev: '감정의 파도를 잠시 가라앉힐 필요가 있습니다.' },
+  swords: { nameKo: '소드', nameEn: 'Swords', symbol: '💨', theme: ['생각','결단','진실'], up: '명료한 판단이 돌파구를 만듭니다.', rev: '생각이 많아져 결단이 흐려질 수 있습니다.' },
+  pentacles: { nameKo: '펜타클', nameEn: 'Pentacles', symbol: '🌿', theme: ['현실','풍요','안정'], up: '현실적인 노력과 결실이 이어집니다.', rev: '기반을 다시 다지며 실용성을 점검해 보세요.' }
+};
+
+const RANKS = [
+  ['Ace','에이스',['시작','씨앗','기회'],'새로운 문이 열리기 시작합니다. 작은 신호를 놓치지 마세요.','시작의 문 앞에서 망설임이 커질 수 있습니다. 첫 발을 가볍게 떼세요.'],
+  ['Two','2',['균형','선택','조율'],'둘 사이의 균형을 찾으면 흐름이 안정됩니다.','우선순위가 흔들리고 있습니다. 선택 기준을 분명히 하세요.'],
+  ['Three','3',['성장','협력','확장'],'함께할수록 더 커지는 기회가 있습니다.','협업의 리듬이 어긋날 수 있습니다. 소통 방식을 조정하세요.'],
+  ['Four','4',['안정','기초','정착'],'바탕을 다지기에 좋은 날입니다. 지켜야 할 것을 정하세요.','지나친 고착이 흐름을 막을 수 있습니다. 약간의 유연함이 필요합니다.'],
+  ['Five','5',['변화','도전','불안'],'작은 긴장이 변화의 문을 엽니다. 두려움보다 배움을 보세요.','불필요한 불안이 커지고 있습니다. 문제를 잘게 나눠보세요.'],
+  ['Six','6',['조화','회복','전진'],'균형이 회복되며 부드러운 전진이 가능합니다.','과거에 붙들리면 흐름이 늦어질 수 있습니다. 지금의 리듬을 선택하세요.'],
+  ['Seven','7',['시험','전략','신념'],'신념을 지키며 전략적으로 움직일 때입니다.','의심이 힘을 빼고 있습니다. 핵심 목표를 다시 확인하세요.'],
+  ['Eight','8',['집중','속도','정렬'],'에너지가 빠르게 정렬됩니다. 주저하지 말고 실천하세요.','조급한 전개가 피로를 만들 수 있습니다. 리듬을 나눠 가세요.'],
+  ['Nine','9',['완성 직전','인내','축적'],'거의 다 왔습니다. 마지막 집중이 결실을 부릅니다.','지친 마음이 속도를 늦출 수 있습니다. 회복과 마무리를 함께 챙기세요.'],
+  ['Ten','10',['완성','정점','다음 주기'],'한 사이클이 무르익었습니다. 다음 단계 준비가 필요합니다.','과부하가 느껴질 수 있습니다. 내려놓을 것을 분명히 하세요.'],
+  ['Page','페이지',['소식','호기심','배움'],'새로운 메시지와 배움이 찾아옵니다. 열린 마음으로 받으세요.','미성숙한 반응이 문제를 키울 수 있습니다. 조금 더 관찰해 보세요.'],
+  ['Knight','나이트',['추진','실행','이동'],'움직임이 빨라집니다. 실천이 답을 앞당깁니다.','성급한 돌진이 생길 수 있습니다. 방향 점검 후 움직이세요.'],
+  ['Queen','퀸',['성숙','돌봄','자기주도'],'성숙한 태도와 자기신뢰가 힘을 줍니다.','지나친 감정 소모나 통제가 보일 수 있습니다. 중심을 회복하세요.'],
+  ['King','킹',['권위','완성도','책임'],'넓은 시야와 책임감이 상황을 안정시킵니다.','권위적 태도나 완고함을 부드럽게 조절할 필요가 있습니다.']
+];
+
+const MINOR_ARCANA = Object.entries(SUITS).flatMap(([suitKey, suit]) => {
+  return RANKS.map((rank, idx) => ({
+    id: `m-${suitKey}-${idx + 1}`,
+    arcana: 'minor',
+    suit: suitKey,
+    nameKo: `${suit.nameKo} ${rank[1]}`,
+    nameEn: `${rank[0]} of ${suit.nameEn}`,
+    symbol: suit.symbol,
+    keywords: [...suit.theme.slice(0, 2), ...rank[2]].slice(0, 4),
+    upMsg: `${suit.up} ${rank[3]}`,
+    revMsg: `${suit.rev} ${rank[4]}`
+  }));
+});
+
+const TAROT_DECK = [...MAJOR_ARCANA, ...MINOR_ARCANA];
+const TAROT_POSITIONS = ['과거', '현재', '미래'];
+
+function getTodayKey() {
+  const d = new Date();
+  return `luna-tarot-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function seedRandom(seed) {
+  let state = seed >>> 0;
+  return function() {
+    state = (1664525 * state + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
+function hashString(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function getTarotContext() {
+  const phaseIndex = currentPhaseData ? currentPhaseData.phaseIndex : 0;
+  return {
+    phaseIndex,
+    element: currentElement || 'air',
+    intro: TAROT_PHASE_INTROS[currentElement || 'air'][phaseIndex] || TAROT_PHASE_INTROS.air[0]
+  };
+}
+
+function drawDailyTarot() {
+  const todayKey = getTodayKey();
+  const saved = localStorage.getItem(todayKey);
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+
+  const d = new Date();
+  const dateSeed = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  const seed = hashString(dateSeed + '-luna-elementum-complete');
+  const rand = seedRandom(seed);
+
+  const picked = [];
+  const used = new Set();
+  while (picked.length < 3) {
+    const idx = Math.floor(rand() * TAROT_DECK.length);
+    if (used.has(idx)) continue;
+    used.add(idx);
+    const card = TAROT_DECK[idx];
+    picked.push({
+      id: card.id,
+      reversed: rand() < 0.38
+    });
+  }
+
+  localStorage.setItem(todayKey, JSON.stringify(picked));
+  return picked;
+}
+
+function getCardById(id) {
+  return TAROT_DECK.find(card => String(card.id) === String(id));
+}
+
+function renderTarot() {
+  const resultEl = document.getElementById('tarot-result');
+  const context = getTarotContext();
+  const draws = drawDailyTarot();
+  const cards = draws.map(getCardById).filter(Boolean);
+  if (!cards.length) return;
+
+  const intro = `${context.intro} ${PHASES[context.phaseIndex].emoji} ${PHASES[context.phaseIndex].ko} · ${ELEMENT_LABELS[context.element]}`;
+
+  resultEl.innerHTML = `
+    <div class="tarot-intro">${intro}</div>
+    <div class="tarot-grid">
+      ${cards.map((card, idx) => {
+        const reversed = !!draws[idx].reversed;
+        const badge = reversed ? '역방향' : '정방향';
+        const message = reversed ? card.revMsg : card.upMsg;
+        return `
+          <article class="tarot-card">
+            <div class="tarot-card-top">
+              <span>${TAROT_POSITIONS[idx]}</span>
+              <span>${card.arcana === 'major' ? 'MAJOR' : (SUITS[card.suit]?.nameEn || '').toUpperCase()}</span>
+            </div>
+            <div class="tarot-card-visual">${card.symbol}</div>
+            <div class="tarot-card-body">
+              <div class="tarot-card-name">${card.nameKo}<small>${card.nameEn}</small></div>
+              <div class="tarot-badge">${badge}</div>
+              <div class="tarot-keywords">${card.keywords.join(' · ')}</div>
+              <div class="tarot-message">${message}</div>
+            </div>
+          </article>
+        `;
+      }).join('')}
+    </div>
+    <div class="tarot-footer-note">오늘의 카드 결과는 하루 동안 저장됩니다. 원소를 바꾸면 해석의 분위기만 달라지고 카드는 유지돼요.</div>
+  `;
+}
+
+function setupInteractiveFeatures() {
+  const qrOpenBtn = document.getElementById('qr-open-btn');
+  const qrCloseBtn = document.getElementById('qr-close-btn');
+  const qrModal = document.getElementById('qr-modal');
+  const copyBtn = document.getElementById('copy-link-btn');
+  const shareBtn = document.getElementById('share-btn');
+  const tarotBtn = document.getElementById('tarot-draw-btn');
+
+  qrOpenBtn?.addEventListener('click', openQrModal);
+  qrCloseBtn?.addEventListener('click', closeQrModal);
+  copyBtn?.addEventListener('click', copyShareUrl);
+  shareBtn?.addEventListener('click', nativeShare);
+  tarotBtn?.addEventListener('click', () => {
+    renderTarot();
+    showToast('오늘의 루나 타로를 펼쳤어요 🔮');
+  });
+
+  qrModal?.addEventListener('click', (e) => {
+    if (e.target === qrModal) closeQrModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeQrModal();
+  });
+}
+
+/* =============================================
+   INIT
+============================================= */
+function init() {
+  updateDate();
+  updateMoon();
+  selectElement(currentElement);
+  setupInteractiveFeatures();
+  if (localStorage.getItem(getTodayKey())) {
+    renderTarot();
+  }
+}
+
+init();
+
+/* =============================================
+   SERVICE WORKER REGISTRATION
+============================================= */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'luna-elementum-mobile-easy-v1';
+const CACHE_NAME = 'luna-elementum-mobile-easy-v2-moonfix';
 const ASSETS = [
   './',
   './index.html',

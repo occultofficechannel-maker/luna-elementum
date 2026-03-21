@@ -1083,89 +1083,88 @@ function renderMoonSVG(age, phaseIndex) {
   const svg = document.getElementById('moon-svg');
   const cx = 70, cy = 70, r = 60;
   const synodic = 29.53058867;
-  const t = age / synodic; // 0~1
+  const t = ((age / synodic) % 1 + 1) % 1; // normalize 0~1
 
-  const moonBase = '#d4c8f0';
-  const moonShadow = '#1a1630';
+  const moonShadow = '#141126';
   const crater1 = '#b8a8d8';
   const crater2 = '#c0b0e0';
 
-  let pathD = '';
-
-  if (phaseIndex === 4) {
-    // Full moon — simple circle
-    pathD = `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
-  } else if (phaseIndex === 0) {
-    // New Moon — no light
+  if (phaseIndex === 0) {
     svg.innerHTML = `
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="${moonShadow}" opacity="0.5"/>
+      <defs>
+        <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#1a1630" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#0a0818" stop-opacity="0.98"/>
+        </radialGradient>
+      </defs>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#shadowGrad)"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(200,180,255,0.10)" stroke-width="2"/>
     `;
     return;
-  } else {
-    // Compute illuminated portion
-    const angle = t * 2 * Math.PI;
-    // rx of the ellipse that separates light/dark
-    const ellipseRx = Math.abs(Math.cos(angle)) * r;
-    const isWaxing = t < 0.5;
-    const ellipseXSign = isWaxing ? 1 : -1;
-
-    // Large arc = right hemisphere lit (waxing) or left (waning)
-    // Draw lit side: always a semicircle on one side + ellipse in the middle
-    const topX = cx;
-    const topY = cy - r;
-    const botX = cx;
-    const botY = cy + r;
-
-    if (isWaxing) {
-      // lit = right side
-      // Right semicircle (large arc, counterclockwise)
-      // Center ellipse (small), flipped inward
-      pathD = [
-        `M ${topX} ${topY}`,
-        `A ${r} ${r} 0 0 1 ${botX} ${botY}`,  // right outer arc (lit)
-        `A ${ellipseRx} ${r} 0 0 1 ${topX} ${topY}`, // inner ellipse back up (shadow side)
-        'Z'
-      ].join(' ');
-    } else {
-      // lit = left side
-      pathD = [
-        `M ${topX} ${topY}`,
-        `A ${r} ${r} 0 0 0 ${botX} ${botY}`,  // left outer arc (lit)
-        `A ${ellipseRx} ${r} 0 0 0 ${topX} ${topY}`, // inner ellipse back up
-        'Z'
-      ].join(' ');
-    }
   }
 
-  // Build SVG
-  let svgContent = `
+  const k = Math.cos(t * 2 * Math.PI); // +1:new, 0:quarter, -1:full
+  const waxing = t < 0.5;
+
+  function terminatorPathBottomToTop() {
+    const pts = [];
+    const steps = 72;
+    for (let i = 0; i <= steps; i++) {
+      const ratio = i / steps;
+      const y = cy + r - (2 * r * ratio);
+      const dy = y - cy;
+      const span = Math.sqrt(Math.max(0, r * r - dy * dy));
+      const x = waxing ? (cx + k * span) : (cx - k * span);
+      pts.push(`${x.toFixed(2)} ${y.toFixed(2)}`);
+    }
+    return pts.join(' L ');
+  }
+
+  let pathD;
+  if (phaseIndex === 4) {
+    pathD = `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
+  } else if (waxing) {
+    pathD = [
+      `M ${cx} ${cy - r}`,
+      `A ${r} ${r} 0 0 1 ${cx} ${cy + r}`,
+      `L ${terminatorPathBottomToTop()}`,
+      'Z'
+    ].join(' ');
+  } else {
+    pathD = [
+      `M ${cx} ${cy - r}`,
+      `A ${r} ${r} 0 0 0 ${cx} ${cy + r}`,
+      `L ${terminatorPathBottomToTop()}`,
+      'Z'
+    ].join(' ');
+  }
+
+  svg.innerHTML = `
     <defs>
       <radialGradient id="moonGrad" cx="45%" cy="40%" r="55%">
         <stop offset="0%" stop-color="#efe8ff"/>
-        <stop offset="60%" stop-color="#c8b8e8"/>
-        <stop offset="100%" stop-color="#a090c0"/>
+        <stop offset="60%" stop-color="#d8c9f6"/>
+        <stop offset="100%" stop-color="#b19cd6"/>
       </radialGradient>
       <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#12102a" stop-opacity="0.95"/>
+        <stop offset="0%" stop-color="#1a1630" stop-opacity="0.95"/>
         <stop offset="100%" stop-color="#0a0818" stop-opacity="0.98"/>
       </radialGradient>
-      <clipPath id="moonClip">
+      <clipPath id="moonDiscClip">
         <circle cx="${cx}" cy="${cy}" r="${r}"/>
       </clipPath>
+      <clipPath id="moonLightClip">
+        <path d="${pathD}"/>
+      </clipPath>
     </defs>
-    <!-- dark base -->
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#shadowGrad)"/>
-    <!-- lit portion -->
-    <path d="${pathD}" fill="url(#moonGrad)" clip-path="url(#moonClip)"/>
-    <!-- craters -->
-    <circle cx="${cx+20}" cy="${cy-15}" r="7" fill="${crater1}" opacity="0.3" clip-path="url(#moonClip)"/>
-    <circle cx="${cx-22}" cy="${cy+12}" r="5" fill="${crater2}" opacity="0.25" clip-path="url(#moonClip)"/>
-    <circle cx="${cx+5}"  cy="${cy+25}" r="4" fill="${crater1}" opacity="0.2"  clip-path="url(#moonClip)"/>
-    <circle cx="${cx-10}" cy="${cy-25}" r="3" fill="${crater2}" opacity="0.2"  clip-path="url(#moonClip)"/>
-    <!-- outer glow ring -->
+    <path d="${pathD}" fill="url(#moonGrad)" clip-path="url(#moonDiscClip)"/>
+    <circle cx="${cx+20}" cy="${cy-15}" r="7" fill="${crater1}" opacity="0.22" clip-path="url(#moonLightClip)"/>
+    <circle cx="${cx-22}" cy="${cy+12}" r="5" fill="${crater2}" opacity="0.20" clip-path="url(#moonLightClip)"/>
+    <circle cx="${cx+5}"  cy="${cy+25}" r="4" fill="${crater1}" opacity="0.18" clip-path="url(#moonLightClip)"/>
+    <circle cx="${cx-10}" cy="${cy-25}" r="3" fill="${crater2}" opacity="0.18" clip-path="url(#moonLightClip)"/>
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(200,180,255,0.12)" stroke-width="2"/>
   `;
-  svg.innerHTML = svgContent;
 }
 
 /* =============================================

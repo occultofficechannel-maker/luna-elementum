@@ -2112,6 +2112,35 @@ function renderTarot() {
   `;
 }
 
+function clearTarotForNewDay() {
+  const resultEl = document.getElementById('tarot-result');
+  if (!resultEl) return;
+  resultEl.innerHTML = `
+    <div class="tarot-intro">자정이 지나 오늘의 타로가 리셋되었어요. 다시 한 번 3장의 카드를 펼쳐보세요. 🌙</div>
+  `;
+}
+
+let lastTarotDayKey = getTodayKey();
+
+function syncDailyTarotReset({ showResetToast = false } = {}) {
+  const currentKey = getTodayKey();
+  if (currentKey === lastTarotDayKey) return;
+
+  lastTarotDayKey = currentKey;
+  updateDate();
+  updateMoon();
+
+  if (localStorage.getItem(currentKey)) {
+    renderTarot();
+  } else {
+    clearTarotForNewDay();
+  }
+
+  if (showResetToast) {
+    showToast('자정이 지나 오늘의 타로가 새로 열렸어요 ✨');
+  }
+}
+
 function setupInteractiveFeatures() {
   const qrOpenBtn = document.getElementById('qr-open-btn');
   const qrCloseBtn = document.getElementById('qr-close-btn');
@@ -2125,6 +2154,7 @@ function setupInteractiveFeatures() {
   copyBtn?.addEventListener('click', copyShareUrl);
   shareBtn?.addEventListener('click', nativeShare);
   tarotBtn?.addEventListener('click', () => {
+    syncDailyTarotReset();
     renderTarot();
     showToast('오늘의 루나 타로를 펼쳤어요 🔮');
   });
@@ -2136,6 +2166,20 @@ function setupInteractiveFeatures() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeQrModal();
   });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      syncDailyTarotReset({ showResetToast: true });
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    syncDailyTarotReset({ showResetToast: true });
+  });
+
+  setInterval(() => {
+    syncDailyTarotReset();
+  }, 30000);
 }
 
 /* =============================================
@@ -2146,6 +2190,7 @@ function init() {
   updateMoon();
   selectElement(currentElement);
   setupInteractiveFeatures();
+  lastTarotDayKey = getTodayKey();
   if (localStorage.getItem(getTodayKey())) {
     renderTarot();
   }

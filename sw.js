@@ -1,4 +1,4 @@
-const CACHE_NAME = 'luna-elementum-mobile-easy-v3-tarotreset';
+const CACHE_NAME = 'luna-elementum-mobile-easy-v5-affinity';
 const ASSETS = [
   './',
   './index.html',

@@ -301,6 +301,134 @@
       margin-bottom: 12px;
     }
 
+    .affinity-section {
+      padding: 0 20px 20px;
+    }
+
+    .affinity-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+    }
+
+    .affinity-title {
+      text-align: center;
+      font-family: 'Noto Serif KR', serif;
+      font-size: 20px;
+      color: var(--elem-primary);
+      line-height: 1.4;
+      transition: color var(--transition);
+    }
+
+    .affinity-subtitle {
+      margin-top: 8px;
+      text-align: center;
+      color: var(--clr-text-dim);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .affinity-progress {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--elem-primary);
+      letter-spacing: 1px;
+    }
+
+    .affinity-question {
+      margin-top: 14px;
+      text-align: center;
+      color: var(--clr-text);
+      font-size: 16px;
+      line-height: 1.6;
+      font-family: 'Noto Serif KR', serif;
+    }
+
+    .affinity-options {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .affinity-option {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      color: var(--clr-text);
+      padding: 14px 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .2s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease;
+    }
+
+    .affinity-option:hover,
+    .affinity-option:active {
+      transform: translateY(-1px);
+      border-color: var(--elem-primary);
+      box-shadow: 0 0 0 1px var(--elem-primary), 0 0 18px var(--elem-glow);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .affinity-result {
+      margin-top: 16px;
+      display: none;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      padding: 16px 14px;
+      text-align: center;
+    }
+
+    .affinity-result.show {
+      display: block;
+    }
+
+    .affinity-result-name {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 20px;
+      color: var(--elem-primary);
+      text-shadow: 0 0 12px var(--elem-glow);
+      line-height: 1.4;
+    }
+
+    .affinity-result-desc {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--clr-text);
+      line-height: 1.75;
+    }
+
+    .affinity-result-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--clr-text-dim);
+      line-height: 1.6;
+    }
+
+    .affinity-actions {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .affinity-mini {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--clr-text-dim);
+      line-height: 1.6;
+    }
+
     .element-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -945,6 +1073,23 @@
 
   <div class="divider" style="margin: 0 20px 20px;"></div>
 
+  <!-- AFFINITY TEST -->
+  <section class="affinity-section" id="affinity-section">
+    <div class="section-label">✧ 나의 원소 성향 알아보기 ✧</div>
+    <div class="affinity-card">
+      <div class="affinity-title">내 안의 원소 찾기</div>
+      <div class="affinity-subtitle">짧은 질문 4개에 답하면 지금 당신에게 가장 가까운 원소를 추천해드려요.</div>
+      <div class="affinity-progress" id="affinity-progress">질문 1 / 4</div>
+      <div class="affinity-question" id="affinity-question"></div>
+      <div class="affinity-options" id="affinity-options"></div>
+      <div class="affinity-result" id="affinity-result"></div>
+      <div class="affinity-actions">
+        <button class="action-btn" id="affinity-restart-btn" type="button">다시 테스트</button>
+      </div>
+      <div class="affinity-mini">추천 원소는 자동 선택되며, 아래에서 직접 다른 원소를 고를 수도 있어요.</div>
+    </div>
+  </section>
+
   <!-- ELEMENT SELECTOR -->
   <section class="element-section">
     <div class="section-label">✧ 원소를 선택하세요 ✧</div>
@@ -983,7 +1128,7 @@
     <div class="tarot-title">OPIO의 루나 타로</div>
     <div class="tarot-subtitle">당신이 가장 궁금해 하는 것을 생각하세요. 오늘의 달 주기와 선택한 원소에 맞춰 하루 한 번, 3장의 카드를 펼칩니다.</div>
     <button class="tarot-draw-btn" id="tarot-draw-btn" type="button">오늘의 타로 펼치기</button>
-    <div class="tarot-note">과거 · 현재 · 미래 3장 리딩 · 하루 1회 저장</div>
+    <div class="tarot-note">타로는 같은 질문을 두 번 하지 않아야 합니다.</div>
     <div class="tarot-result" id="tarot-result"></div>
   </section>
 
@@ -1717,9 +1862,10 @@ function selectElement(el) {
   // Update ritual section
   updateRitual();
 
-  // Re-render tarot intro with current element/phase
-  if (document.getElementById('tarot-result') && localStorage.getItem(getTodayKey())) {
-    renderTarot();
+  // Keep tarot cards, only refresh interpretation mood if cards already exist
+  const tarotResult = document.getElementById('tarot-result');
+  if (tarotResult && tarotResult.children.length && lastTarotDraws) {
+    renderTarot(lastTarotDraws);
   }
 }
 
@@ -2011,11 +2157,6 @@ const MINOR_ARCANA = Object.entries(SUITS).flatMap(([suitKey, suit]) => {
 const TAROT_DECK = [...MAJOR_ARCANA, ...MINOR_ARCANA];
 const TAROT_POSITIONS = ['과거', '현재', '미래'];
 
-function getTodayKey() {
-  const d = new Date();
-  return `luna-tarot-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-}
-
 function seedRandom(seed) {
   let state = seed >>> 0;
   return function() {
@@ -2042,17 +2183,15 @@ function getTarotContext() {
   };
 }
 
-function drawDailyTarot() {
-  const todayKey = getTodayKey();
-  const saved = localStorage.getItem(todayKey);
-  if (saved) {
-    try { return JSON.parse(saved); } catch (e) {}
-  }
+let lastTarotDraws = null;
 
-  const d = new Date();
-  const dateSeed = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-  const seed = hashString(dateSeed + '-luna-elementum-complete');
-  const rand = seedRandom(seed);
+function drawDailyTarot() {
+  const rand = (() => {
+    if (window.crypto?.getRandomValues) {
+      return () => window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
+    }
+    return Math.random;
+  })();
 
   const picked = [];
   const used = new Set();
@@ -2067,7 +2206,7 @@ function drawDailyTarot() {
     });
   }
 
-  localStorage.setItem(todayKey, JSON.stringify(picked));
+  lastTarotDraws = picked;
   return picked;
 }
 
@@ -2075,12 +2214,15 @@ function getCardById(id) {
   return TAROT_DECK.find(card => String(card.id) === String(id));
 }
 
-function renderTarot() {
+function renderTarot(draws = lastTarotDraws || drawDailyTarot()) {
   const resultEl = document.getElementById('tarot-result');
   const context = getTarotContext();
-  const draws = drawDailyTarot();
   const cards = draws.map(getCardById).filter(Boolean);
-  if (!cards.length) return;
+  if (!cards.length) {
+    lastTarotDraws = null;
+    resultEl.innerHTML = '<div class="tarot-intro">카드를 다시 펼쳐 주세요. 잠시 후 새로운 흐름이 열립니다. 🔮</div>';
+    return;
+  }
 
   const intro = `${context.intro} ${PHASES[context.phaseIndex].emoji} ${PHASES[context.phaseIndex].ko} · ${ELEMENT_LABELS[context.element]}`;
 
@@ -2108,37 +2250,141 @@ function renderTarot() {
         `;
       }).join('')}
     </div>
-    <div class="tarot-footer-note">오늘의 카드 결과는 하루 동안 저장됩니다. 원소를 바꾸면 해석의 분위기만 달라지고 카드는 유지돼요.</div>
+    <div class="tarot-footer-note">타로는 같은 질문을 두 번 하지 않아야 합니다. 질문을 바꿔 새로운 흐름을 살펴보세요.</div>
   `;
 }
 
-function clearTarotForNewDay() {
-  const resultEl = document.getElementById('tarot-result');
-  if (!resultEl) return;
+const AFFINITY_QUESTIONS = [
+  {
+    question: '새로운 일이 시작되면 나는 먼저…',
+    options: [
+      { text: '망설이기보다 바로 움직여 본다.', element: 'fire' },
+      { text: '내 감정과 직감을 먼저 살핀다.', element: 'water' },
+      { text: '현실적으로 가능한 방법부터 정리한다.', element: 'earth' },
+      { text: '전체 흐름과 가능성을 먼저 그려 본다.', element: 'air' }
+    ]
+  },
+  {
+    question: '사람들은 나를 어떤 타입으로 보는 편인가요?',
+    options: [
+      { text: '열정적이고 추진력이 강한 사람', element: 'fire' },
+      { text: '섬세하고 공감 능력이 좋은 사람', element: 'water' },
+      { text: '안정적이고 믿을 수 있는 사람', element: 'earth' },
+      { text: '자유롭고 아이디어가 많은 사람', element: 'air' }
+    ]
+  },
+  {
+    question: '스트레스를 받으면 나는 보통…',
+    options: [
+      { text: '답답해서라도 움직이며 돌파구를 찾는다.', element: 'fire' },
+      { text: '혼자 감정을 가라앉히고 마음을 정리한다.', element: 'water' },
+      { text: '생활 리듬과 해야 할 일을 다시 세운다.', element: 'earth' },
+      { text: '생각을 정리하며 거리를 두고 바라본다.', element: 'air' }
+    ]
+  },
+  {
+    question: '지금 내게 가장 필요한 에너지는…',
+    options: [
+      { text: '용기 있게 시작하는 추진력', element: 'fire' },
+      { text: '마음을 돌보는 치유와 직감', element: 'water' },
+      { text: '흔들리지 않는 안정과 기반', element: 'earth' },
+      { text: '새 관점과 통찰, 가벼운 전환', element: 'air' }
+    ]
+  }
+];
+
+const AFFINITY_RESULT_COPY = {
+  fire: {
+    title: '당신의 원소는 불 🔥',
+    desc: '당신은 열정과 추진력이 강하고, 생각에 머무르기보다 움직이며 길을 만드는 성향이 큽니다. 지금은 망설임보다 행동이 힘이 되는 시기예요.'
+  },
+  water: {
+    title: '당신의 원소는 물 💧',
+    desc: '당신은 감정의 결을 섬세하게 읽고, 직감과 공감을 통해 흐름을 파악하는 힘이 큽니다. 지금은 억지 전진보다 마음의 파장을 듣는 일이 중요해요.'
+  },
+  earth: {
+    title: '당신의 원소는 흙 🌿',
+    desc: '당신은 안정감과 지속성, 현실 감각이 돋보이는 성향입니다. 지금은 흔들리는 마음을 다독이며 삶의 기반을 단단히 세우는 것이 큰 힘이 됩니다.'
+  },
+  air: {
+    title: '당신의 원소는 바람 💨',
+    desc: '당신은 생각과 통찰, 연결의 힘이 강한 사람입니다. 지금은 더 넓게 보고 새로운 관점으로 해석할 때 길이 열리는 흐름이에요.'
+  }
+};
+
+let affinityState = null;
+
+function resetAffinityTest() {
+  affinityState = {
+    index: 0,
+    scores: { fire: 0, water: 0, earth: 0, air: 0 }
+  };
+  const resultEl = document.getElementById('affinity-result');
+  if (resultEl) {
+    resultEl.classList.remove('show');
+    resultEl.innerHTML = '';
+  }
+  renderAffinityQuestion();
+}
+
+function getAffinityWinner() {
+  const order = ['fire', 'water', 'earth', 'air'];
+  return Object.entries(affinityState.scores)
+    .sort((a, b) => (b[1] - a[1]) || (order.indexOf(a[0]) - order.indexOf(b[0])))[0][0];
+}
+
+function renderAffinityQuestion() {
+  const progressEl = document.getElementById('affinity-progress');
+  const questionEl = document.getElementById('affinity-question');
+  const optionsEl = document.getElementById('affinity-options');
+  const current = AFFINITY_QUESTIONS[affinityState.index];
+  if (!progressEl || !questionEl || !optionsEl || !current) return;
+
+  progressEl.textContent = `질문 ${affinityState.index + 1} / ${AFFINITY_QUESTIONS.length}`;
+  questionEl.textContent = current.question;
+  optionsEl.innerHTML = current.options.map(option => `
+    <button class="affinity-option" type="button" onclick="pickAffinityOption('${option.element}')">${option.text}</button>
+  `).join('');
+}
+
+function showAffinityResult(element) {
+  const progressEl = document.getElementById('affinity-progress');
+  const questionEl = document.getElementById('affinity-question');
+  const optionsEl = document.getElementById('affinity-options');
+  const resultEl = document.getElementById('affinity-result');
+  const copy = AFFINITY_RESULT_COPY[element];
+  if (!progressEl || !questionEl || !optionsEl || !resultEl || !copy) return;
+
+  progressEl.textContent = '테스트 완료';
+  questionEl.textContent = '지금 당신에게 가장 가까운 원소를 찾았어요.';
+  optionsEl.innerHTML = '';
   resultEl.innerHTML = `
-    <div class="tarot-intro">자정이 지나 오늘의 타로가 리셋되었어요. 다시 한 번 3장의 카드를 펼쳐보세요. 🌙</div>
+    <div class="affinity-result-name">${copy.title}</div>
+    <div class="affinity-result-desc">${copy.desc}</div>
+    <div class="affinity-result-note">추천 원소가 자동으로 선택되었어요. 아래 원소 버튼에서 자유롭게 바꿀 수도 있어요.</div>
   `;
+  resultEl.classList.add('show');
+  selectElement(element);
+  showToast(`${ELEMENT_LABELS[element]} 성향이 가장 강해요 ✨`);
 }
 
-let lastTarotDayKey = getTodayKey();
+function pickAffinityOption(element) {
+  if (!affinityState) resetAffinityTest();
+  affinityState.scores[element] += 1;
+  affinityState.index += 1;
 
-function syncDailyTarotReset({ showResetToast = false } = {}) {
-  const currentKey = getTodayKey();
-  if (currentKey === lastTarotDayKey) return;
-
-  lastTarotDayKey = currentKey;
-  updateDate();
-  updateMoon();
-
-  if (localStorage.getItem(currentKey)) {
-    renderTarot();
-  } else {
-    clearTarotForNewDay();
+  if (affinityState.index >= AFFINITY_QUESTIONS.length) {
+    showAffinityResult(getAffinityWinner());
+    return;
   }
 
-  if (showResetToast) {
-    showToast('자정이 지나 오늘의 타로가 새로 열렸어요 ✨');
-  }
+  renderAffinityQuestion();
+}
+
+function setupAffinityTest() {
+  const restartBtn = document.getElementById('affinity-restart-btn');
+  restartBtn?.addEventListener('click', resetAffinityTest);
+  resetAffinityTest();
 }
 
 function setupInteractiveFeatures() {
@@ -2154,9 +2400,8 @@ function setupInteractiveFeatures() {
   copyBtn?.addEventListener('click', copyShareUrl);
   shareBtn?.addEventListener('click', nativeShare);
   tarotBtn?.addEventListener('click', () => {
-    syncDailyTarotReset();
     renderTarot();
-    showToast('오늘의 루나 타로를 펼쳤어요 🔮');
+    showToast('루나 타로를 펼쳤어요 🔮');
   });
 
   qrModal?.addEventListener('click', (e) => {
@@ -2167,19 +2412,6 @@ function setupInteractiveFeatures() {
     if (e.key === 'Escape') closeQrModal();
   });
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      syncDailyTarotReset({ showResetToast: true });
-    }
-  });
-
-  window.addEventListener('focus', () => {
-    syncDailyTarotReset({ showResetToast: true });
-  });
-
-  setInterval(() => {
-    syncDailyTarotReset();
-  }, 30000);
 }
 
 /* =============================================
@@ -2189,11 +2421,8 @@ function init() {
   updateDate();
   updateMoon();
   selectElement(currentElement);
+  setupAffinityTest();
   setupInteractiveFeatures();
-  lastTarotDayKey = getTodayKey();
-  if (localStorage.getItem(getTodayKey())) {
-    renderTarot();
-  }
 }
 
 init();
